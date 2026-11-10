@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#10121a">
+<meta name="description" content="Carnet de leveling voleur elfe de la nuit sur WoW Forever : talents, sorts, armes, parcours.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carnet voleur">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carnet du voleur Forever</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+
+/* Layout : barre de niveau collante en haut, puis colonne principale (actions du niveau, arbre, armes) et colonne latérale (parcours, donjons). Une colonne sur téléphone. */
+:root{
+  --bg:#eceef3; --panel:#f9fafc; --panel2:#e2e5ee; --ink:#1b1d2b; --muted:#5a5f73; --line:#d2d6e1;
+  --rogue:#fff569; --rogue-ink:#6b5a00; --violet:#55479a; --violet-soft:#e3defa;
+  --ok:#23804a; --warn:#9a5b00; --dim:#a3a8b8; --q2:#12860a; --q3:#0b5fc0; --q2-icon:#1eff00; --q3-icon:#3d9bff;
+  --f-display:"Alegreya SC", Georgia, "Times New Roman", serif;
+  --f-body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#10121a; --panel:#181b26; --panel2:#222636; --ink:#e8e9f0; --muted:#9ba1b6; --line:#2b3042;
+  --rogue:#fff569; --rogue-ink:#fff569; --violet:#a796f2; --violet-soft:#2a2547;
+  --ok:#5fcf86; --warn:#f0b35a; --dim:#555b70; --q2:#3ee65a; --q3:#5aa8ff; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#10121a; --panel:#181b26; --panel2:#222636; --ink:#e8e9f0; --muted:#9ba1b6; --line:#2b3042;
+  --rogue:#fff569; --rogue-ink:#fff569; --violet:#a796f2; --violet-soft:#2a2547;
+  --ok:#5fcf86; --warn:#f0b35a; --dim:#555b70; --q2:#3ee65a; --q3:#5aa8ff; color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 48px}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top, 0px); z-index:10; background:var(--bg)}
+.wrap{max-width:1180px; margin:0 auto}
+h1,h2,h3{font-family:var(--f-display); font-weight:700; text-wrap:balance; margin:0; letter-spacing:.01em}
+h2{font-size:1.3rem}
+h3{font-size:1.05rem}
+p{margin:0}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+a{color:var(--violet)}
+button{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--violet); outline-offset:2px}
+
+/* En-tête */
+header.top{padding-block:28px 14px; display:flex; flex-wrap:wrap; gap:8px 24px; align-items:end; justify-content:space-between}
+header.top h1{font-size:clamp(1.7rem, 4vw, 2.4rem); line-height:1.1}
+header.top .sub{color:var(--muted); max-width:60ch}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.85rem; color:var(--muted)}
+.legend span{white-space:nowrap}
+
+/* Barre de niveau */
+.levelbar{position:sticky; top:env(safe-area-inset-top, 0px); z-index:5; background:var(--bg); padding-block:10px; border-bottom:1px solid var(--line)}
+.levelbar .in{display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px}
+.lvl{display:flex; align-items:center; gap:8px}
+.lvl button{width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--panel); font-size:1.3rem; cursor:pointer; line-height:1}
+.lvl button:hover{border-color:var(--violet)}
+.lvl button:disabled{opacity:.35; cursor:default}
+.lvlnum{min-width:96px; text-align:center}
+.lvlnum .k{display:block; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.lvlnum .v{font-family:var(--f-display); font-size:2.1rem; line-height:1; color:var(--ink)}
+.slider{flex:1 1 220px; min-width:0; display:flex; flex-direction:column; gap:2px}
+.slider input{width:100%; accent-color:var(--violet)}
+.ticks{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:.7rem; color:var(--muted)}
+.pts{font-size:.9rem; color:var(--muted)}
+.pts b{color:var(--ink)}
+
+/* Grille principale */
+.grid{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:18px; margin-top:18px}
+@media (max-width:860px){ .grid{grid-template-columns:minmax(0,1fr)} }
+.col{display:flex; flex-direction:column; gap:18px; min-width:0}
+section.card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; min-width:0}
+.card-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px; margin-bottom:12px}
+.card-head .note{font-size:.85rem; color:var(--muted)}
+
+/* Noms */
+.fr{font-weight:700}
+.en{color:var(--muted); font-style:italic}
+.unsure{text-decoration:underline dotted var(--warn); text-underline-offset:3px; cursor:help}
+.unsure sup{color:var(--warn); font-weight:700; margin-left:1px}
+.nofr{color:var(--warn); font-weight:500; font-style:normal}
+
+/* Bloc "au niveau" */
+.now{border-color:var(--violet)}
+.now-list{display:flex; flex-direction:column; gap:12px; margin:0; padding:0; list-style:none}
+.now-list li{display:grid; grid-template-columns:118px minmax(0,1fr); gap:10px; align-items:baseline}
+@media (max-width:480px){ .now-list li{grid-template-columns:minmax(0,1fr); gap:2px} }
+.tag{font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.talent-pill{display:inline-block; background:var(--rogue); color:#2b2600; padding:1px 8px; border-radius:4px; font-weight:700}
+.talent-pill .en{color:#5c5410}
+.small{font-size:.9rem; color:var(--muted)}
+.next{margin-top:14px; padding-top:12px; border-top:1px solid var(--line)}
+.next ol{margin:6px 0 0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px}
+.next li{display:grid; grid-template-columns:44px minmax(0,1fr); gap:8px; font-size:.95rem}
+.next .mono{color:var(--violet)}
+
+/* Arbre */
+.tree{display:grid; grid-template-columns:34px repeat(4, minmax(0,1fr)); gap:8px; overflow-x:auto}
+.tier-lab{font-family:var(--f-mono); font-size:.7rem; color:var(--muted); align-self:center; text-align:center; line-height:1.2}
+.node{border:1px solid var(--line); background:var(--panel2); border-radius:8px; padding:7px 8px; text-align:left; cursor:pointer; min-height:62px; display:flex; flex-direction:column; justify-content:space-between; gap:4px; min-width:0}
+.node .nfr{font-weight:700; font-size:.86rem; line-height:1.15; overflow-wrap:anywhere}
+.node .nr{font-family:var(--f-mono); font-size:.75rem; color:var(--muted)}
+.node.has{background:var(--violet-soft); border-color:var(--violet)}
+.node.has .nr{color:var(--violet)}
+.node.full .nr::after{content:" max"}
+.node.new{box-shadow:0 0 0 2px var(--rogue), 0 0 14px 2px color-mix(in srgb, var(--rogue) 55%, transparent)}
+.node.locked{opacity:.45}
+.node.sel{outline:2px solid var(--ink); outline-offset:1px}
+.node.empty{visibility:hidden; pointer-events:none}
+.tdetail{margin-top:12px; padding:12px; border-radius:8px; background:var(--panel2); min-height:64px}
+.tdetail p+p{margin-top:4px}
+
+/* Armes */
+.best{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-bottom:14px}
+@media (max-width:560px){ .best{grid-template-columns:minmax(0,1fr)} }
+.bestbox{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--panel2); min-width:0}
+.bestbox .tag{display:block; margin-bottom:2px}
+.bestbox.go{border-color:var(--ok)}
+.bestbox.go .tag{color:var(--ok)}
+.bestbox.soon{border-color:var(--warn)}
+.bestbox.soon .tag{color:var(--warn)}
+.filters{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px}
+.chip{border:1px solid var(--line); background:var(--panel); padding:3px 11px; border-radius:999px; cursor:pointer; font-size:.88rem}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:.92rem; min-width:620px}
+th{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:1px solid var(--line)}
+td{padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:top}
+td.num{font-family:var(--f-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.ok td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
+tr.soon td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+tr.far{opacity:.5}
+.state{font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap}
+.state.ok{color:var(--ok)} .state.soon{color:var(--warn)} .state.far{color:var(--muted)}
+
+/* Parcours */
+.route{display:flex; flex-direction:column; gap:8px}
+.stop{display:grid; grid-template-columns:62px minmax(0,1fr); gap:10px; padding:9px 10px; border-radius:8px; border:1px solid transparent}
+.stop .range{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); padding-top:2px}
+.stop.cur{border-color:var(--violet); background:var(--violet-soft)}
+.stop.cur .range{color:var(--violet); font-weight:500}
+.stop.past{opacity:.55}
+.stop p{font-size:.92rem}
+.stop .hub{font-size:.85rem; color:var(--muted)}
+.bar{position:relative; height:6px; border-radius:3px; background:var(--panel2); margin:6px 0 2px}
+.bar i{position:absolute; top:0; bottom:0; border-radius:3px; background:var(--violet)}
+.bar b{position:absolute; top:-3px; width:2px; height:12px; background:var(--rogue-ink)}
+
+/* Donjons */
+.dj{display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none}
+.dj li{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; font-size:.93rem; padding:5px 0; border-bottom:1px solid var(--line)}
+.dj li.in .lv{color:var(--ok); font-weight:500}
+.dj li.out{opacity:.5}
+.lv{font-family:var(--f-mono); font-size:.82rem; white-space:nowrap}
+
+.ilist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.ilist > li{border-bottom:1px solid var(--line)}
+.ilist > li.ok{box-shadow:inset 3px 0 0 var(--ok)}
+.ilist > li.soon{box-shadow:inset 3px 0 0 var(--warn)}
+.ilist > li.far{opacity:.55}
+.ilist details > summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:4px 12px; padding:10px 6px 10px 12px; align-items:center}
+.ilist details > summary::-webkit-details-marker{display:none}
+.ilist details > summary:hover{background:var(--panel2)}
+.ico{position:relative; width:44px; height:44px; border-radius:5px; flex:none; display:grid; place-items:center; overflow:hidden;
+  background:radial-gradient(circle at 34% 28%, #3b4157 0%, #1a1d29 55%, #08090e 100%);
+  border:2px solid var(--q2-icon); box-shadow:inset 0 0 0 1px rgba(0,0,0,.7), inset 0 0 10px rgba(0,0,0,.85), 0 0 7px -2px var(--q2-icon)}
+.ico .icoimg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:3px}
+.ico::after{content:""; position:absolute; inset:0; z-index:1; border-radius:3px; background:linear-gradient(155deg, rgba(255,255,255,.16), rgba(255,255,255,0) 42%); pointer-events:none}
+.ico svg{width:38px; height:38px; display:block; filter:drop-shadow(0 1px 1px rgba(0,0,0,.8))}
+.ico.q3{border-color:var(--q3-icon); box-shadow:inset 0 0 0 1px rgba(0,0,0,.7), inset 0 0 10px rgba(0,0,0,.85), 0 0 7px -2px var(--q3-icon)}
+.ico.q0{border-color:#6b6f7d; box-shadow:inset 0 0 0 1px rgba(0,0,0,.7), inset 0 0 10px rgba(0,0,0,.85)}
+.qn{font-weight:700}
+.qn.q2{color:var(--q2)} .qn.q3{color:var(--q3)}
+.imeta{font-size:.86rem; color:var(--muted); margin-top:1px}
+.idps{font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; font-size:1rem}
+.idps small{display:block; font-family:var(--f-body); font-size:.72rem; color:var(--muted)}
+.tip{margin:0 10px 12px 68px; padding:12px 14px; border-radius:8px; background:#141720; color:#e6e7ee; font-size:.9rem; display:flex; flex-direction:column; gap:3px; max-width:440px}
+@media (max-width:480px){ .tip{margin-left:12px} }
+.tip .tq2{color:#1eff00; font-weight:700} .tip .tq3{color:#4aa3ff; font-weight:700} .tip .tq0{color:#ffffff; font-weight:700}
+.tip .row{display:flex; justify-content:space-between; gap:12px}
+.tip .eff{color:#1eff00}
+.tip .lvl{color:#e6e7ee}
+.tip .cav{color:#ffcf5c}
+.tip a{color:#a796f2}
+.tip .src{color:#b6bac8; font-size:.84rem; margin-top:4px}
+.warnchip{display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.04em; color:var(--warn); border:1px solid var(--warn); border-radius:4px; padding:0 5px; margin-left:4px; vertical-align:1px}
+.bestbox .bhead{display:flex; gap:10px; align-items:center}
+/* Salle des Thanes */
+details.hot{border:1px solid var(--line); border-radius:10px; background:var(--panel)}
+details.hot > summary{cursor:pointer; padding:16px 18px; list-style:none; display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; justify-content:space-between}
+details.hot > summary::-webkit-details-marker{display:none}
+details.hot > summary h2::before{content:"▸ "; color:var(--violet)}
+details.hot[open] > summary h2::before{content:"▾ "}
+.hot-body{padding:0 18px 18px; display:flex; flex-direction:column; gap:14px}
+.quests{display:flex; flex-direction:column; gap:10px; margin:0; padding:0; list-style:none}
+.quests li{padding:10px 12px; border-radius:8px; background:var(--panel2)}
+.quests li label{display:flex; gap:10px; align-items:flex-start; cursor:pointer}
+.quests input{margin-top:5px; accent-color:var(--violet); width:16px; height:16px; flex:none}
+.quests li.done{opacity:.6}
+.quests .meta{font-size:.88rem; color:var(--muted); margin-top:2px}
+.reward{font-size:.9rem; margin-top:3px}
+.bosses{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin:0; padding:0; list-style:none}
+@media (max-width:560px){ .bosses{grid-template-columns:minmax(0,1fr)} }
+.bosses li{padding:9px 11px; border-left:3px solid var(--violet); background:var(--panel2); border-radius:0 8px 8px 0; font-size:.92rem}
+.bosses .ord{font-family:var(--f-mono); font-size:.75rem; color:var(--muted); display:block}
+
+ul.plain{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px}
+.sources{font-size:.88rem; color:var(--muted)}
+.sources ul{margin:6px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:3px}
+footer{margin-top:22px}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+.node, .chip, .stop{transition:background-color .15s, border-color .15s, box-shadow .2s}
+</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fc"/><stop offset=".45" stop-color="#aeb6c6"/><stop offset="1" stop-color="#565d6e"/></linearGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".5" stop-color="#d39a2a"/><stop offset="1" stop-color="#7a520c"/></linearGradient>
+  <linearGradient id="gBrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0cf7a"/><stop offset=".55" stop-color="#a87a2a"/><stop offset="1" stop-color="#5a3e10"/></linearGradient>
+  <linearGradient id="gLeather" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a06a3a"/><stop offset=".6" stop-color="#6a4120"/><stop offset="1" stop-color="#3a220e"/></linearGradient>
+  <linearGradient id="gWood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b07a44"/><stop offset="1" stop-color="#4e2f14"/></linearGradient>
+  <linearGradient id="gBone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf3da"/><stop offset=".6" stop-color="#cdbd8c"/><stop offset="1" stop-color="#857650"/></linearGradient>
+  <radialGradient id="gGem" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#d6f4ff"/><stop offset=".5" stop-color="#3a9be0"/><stop offset="1" stop-color="#123c74"/></radialGradient>
+  <radialGradient id="gRuby" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#ffd0d0"/><stop offset=".5" stop-color="#e0303c"/><stop offset="1" stop-color="#6a0610"/></radialGradient>
+  <radialGradient id="gVenom" cx=".4" cy=".4" r=".7"><stop offset="0" stop-color="#e0ffb0"/><stop offset="1" stop-color="#3f8a12"/></radialGradient>
+</defs></svg>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Carnet du voleur Forever</h1>
+      <p class="sub">Elfe de la nuit, Alliance, spé Combat. Choisis ton niveau : l'outil affiche le point de talent à placer, les sorts à apprendre, où aller et l'arme à viser.</p>
+    </div>
+    <div class="legend" aria-label="Légende des noms">
+      <span><b>Nom FR</b> <i>(English)</i> : FR vérifié sur une source</span>
+      <span><span class="fr unsure">Nom<sup>?</sup></span> : FR à confirmer en jeu</span>
+      <span><span class="nofr">nom FR non trouvé</span> : seul l'anglais est sourcé</span>
+    </div>
+  </header>
+
+  <div class="levelbar">
+    <div class="in">
+      <div class="lvl">
+        <button id="minus" type="button" aria-label="Niveau précédent">−</button>
+        <div class="lvlnum"><span class="k">Niveau</span><span class="v mono" id="lvlv">17</span></div>
+        <button id="plus" type="button" aria-label="Niveau suivant">+</button>
+      </div>
+      <div class="slider">
+        <label for="lvlr" class="small" style="position:absolute;left:-9999px">Niveau</label>
+        <input type="range" id="lvlr" min="17" max="40" step="1" value="17">
+        <div class="ticks" aria-hidden="true"><span>17</span><span>20</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
+      </div>
+      <p class="pts" id="pts"></p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <section class="card now" aria-live="polite">
+        <div class="card-head"><h2 id="nowTitle">Au niveau 17</h2><span class="note">Ce que tu fais en atteignant ce niveau</span></div>
+        <ul class="now-list" id="nowList"></ul>
+        <div class="next"><span class="tag">Les 5 prochains niveaux</span><ol id="nextList"></ol></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Arbre Combat</h2><span class="note" id="treeNote"></span></div>
+        <div class="tree" id="tree" role="group" aria-label="Arbre de talents Combat"></div>
+        <div class="tdetail" id="tdetail"><p class="small">Touche un talent pour voir son effet et à quels niveaux le parcours le prend.</p></div>
+        <p class="small" style="margin-top:10px">Parcours niveau par niveau du guide de leveling Combat de Wowhead (warstry, relu par Simonize, mis à jour le 6 novembre 2026). Un point par niveau dès le 10, chaque rang exige 5 points de plus dans l'arbre Combat. La dernière ligne (Assa.) montre les 2 points pris dans l'arbre Assassinat. Les builds « donjon et raid » de Wowhead sont signalés par le site lui-même comme cassés depuis la refonte des arbres : ne les suis pas.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Armes à viser</h2><span class="note">Meilleure arme choisie au DPS, armes de lanceur exclues</span></div>
+        <div class="best" id="best"></div>
+        <div class="filters" role="group" aria-label="Filtrer les armes">
+          <button class="chip" type="button" data-f="all" aria-pressed="true">Tout</button>
+          <button class="chip" type="button" data-f="melee" aria-pressed="false">Mêlée</button>
+          <button class="chip" type="button" data-f="ranged" aria-pressed="false">Distance</button>
+          <button class="chip" type="button" data-f="sword" aria-pressed="false">Épées 1M</button>
+          <button class="chip" type="button" data-f="armor" aria-pressed="false">Armure et bijoux</button>
+          <button class="chip hchip" type="button" id="hideH" aria-pressed="true">Masquer le territoire Horde</button>
+        </div>
+        <ul class="ilist" id="wbody"></ul>
+        <p class="small" style="margin-top:10px">Elfe de la nuit : tu démarres avec Dagues et Armes de jet seulement. Pour une épée comme la <span class="fr">Lame de cruauté</span> <span class="en">(Cruel Barb)</span>, apprends la compétence Épées chez Woo Ping à Hurlevent (Stormwind). En Forever, Combat et Finesse utilisent tous les types d'armes, et les voleurs peuvent porter des haches. À partir de Taillader et trancher (niveau 36 dans le parcours) : une masse, dans n'importe quelle main, donne sa pénétration d'armure aux deux mains ; le bonus de critique d'une dague ou d'une arme de poing ne vaut que pour la main qui la tient ; l'attaque supplémentaire d'une épée ou d'une hache part toujours de la main droite. Touche un objet pour voir sa fiche (stats lues sur la base Forever de Wowhead). Icônes redessinées dans le style du jeu, cadre à la couleur de rareté (vert inhabituel, bleu rare) : le lien Wowhead de chaque fiche montre l'icône officielle.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <details class="hot" id="thanes">
+        <summary><h2>Salle des Thanes</h2><span class="note small"><i>(Hall of Thanes)</i> · niv. 13 à 18 · Forgefer</span></summary>
+        <div class="hot-body">
+          <p class="small">Le donjon de Forgefer (Ironforge). À 17 tu es en haut de la fourchette : les monstres rapportent peu, l'XP vient des 5 quêtes (environ 13 300 XP au total pour l'Alliance selon ForeverChanges). Prends tout avant d'entrer.</p>
+          <div>
+            <h3>Accès</h3>
+            <p class="small" style="margin-top:4px">Sous le Haut Siège, dans le Vieux Forgefer (Old Ironforge), coordonnées 43, 51. Depuis la salle du trône de Magni, passage à gauche qui descend. Les sources décrivent la route un peu différemment : suis la descente depuis le trône.</p>
+          </div>
+          <div>
+            <h3>Quêtes (coche au fur et à mesure)</h3>
+            <ul class="quests" id="tquests" style="margin-top:8px"></ul>
+          </div>
+          <div>
+            <h3>Boss dans l'ordre</h3>
+            <ul class="bosses" id="tbosses" style="margin-top:8px"></ul>
+          </div>
+          <div>
+            <h3>Ton rôle de voleur dans le groupe</h3>
+            <ul class="plain small" style="margin-top:6px">
+              <li><span class="fr">Assommer</span> <span class="en">(Sap)</span> un humanoïde avant chaque pull : les Nains Sombrefer s'y prêtent, pas les élémentaires ni les morts-vivants.</li>
+              <li><span class="fr">Coup de pied</span> <span class="en">(Kick)</span> sur les incantations, surtout autour de Faldrim.</li>
+              <li>Ne frappe qu'une fois que le tank a la menace : il tient 3 ou 4 cibles. Si tu prends l'aggro, <span class="fr">Evasion</span> <span class="en">(Evasion)</span>.</li>
+              <li>Durgen fait fuir de peur : nettoyez les bords mais laissez les golems, ils l'attirent. Les golems tués restent morts après un wipe.</li>
+              <li>La tablette du <span class="fr">Traité d'entente</span> est facile à rater : zone du coffre près du levier de sortie.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <section class="card">
+        <div class="card-head"><h2>Parcours</h2><span class="note">Zone en cours surlignée</span></div>
+        <div class="route" id="route"></div>
+        <p class="small" style="margin-top:10px">Ordre adapté à un elfe de la nuit qui part de Forgefer, à partir des fourchettes des guides Forever. Les sites ne sont pas d'accord à 2 ou 3 niveaux près : si une zone devient grise (quêtes trop basses), passe à la suivante.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Donjons</h2><span class="note" id="djNote"></span></div>
+        <ul class="dj" id="djList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <footer class="card sources" style="margin-top:18px">
+    <h3>Sources consultées le 9 novembre 2026</h3>
+    <ul>
+      <li>Salle des Thanes : <a href="https://gamewave.fr/world-of-warcraft-forever/wow-forever-entree-et-quetes-du-donjon-de-la-salle-des-thanes/" target="_blank" rel="noopener">GameWave</a>, <a href="https://lataverneforever.fr/guides/salle-des-thanes-guide-donjon-wow-forever" target="_blank" rel="noopener">La Taverne Forever</a>, <a href="https://foreverchanges.pro/fr/dungeons/hall-of-thanes" target="_blank" rel="noopener">ForeverChanges</a>, <a href="https://wowclassicforever.info/dungeons/hall-of-thanes/" target="_blank" rel="noopener">WoWClassicForever.info</a></li>
+      <li>Talents, sorts à apprendre, règles d'armes : <a href="https://www.wowhead.com/forever/guide/classes/rogue/combat/dps-leveling-tips" target="_blank" rel="noopener">Wowhead, guide de leveling Combat</a>, <a href="https://www.wowhead.com/forever/guide/classes/rogue/combat/talent-builds-pve-dps" target="_blank" rel="noopener">Wowhead, builds Combat</a></li>
+      <li>Noms FR des talents : <a href="https://foreverchanges.pro/fr/talents/rogue" target="_blank" rel="noopener">ForeverChanges (noms FR)</a>, <a href="https://classicwowforever.com/class-guides/rogue/combat/" target="_blank" rel="noopener">ClassicWoWForever (parcours Combat)</a>, <a href="https://kami-labs.fr/wow-forever/build-voleur-combat-wow-forever/" target="_blank" rel="noopener">Kami Labs</a></li>
+      <li>Sorts et poisons : <a href="https://foreverdb.net/class/Rogue" target="_blank" rel="noopener">ForeverDB</a>, <a href="https://wowforever.be/fr/guides/poisons/" target="_blank" rel="noopener">WoWForever.be</a>, <a href="https://wow.gg/fr/guides/wow-forever-combat-rogue" target="_blank" rel="noopener">wow.gg</a></li>
+      <li>Quêtes de classe : <a href="https://forg.gg/en/forever/tips/rogue-quests" target="_blank" rel="noopener">forg.gg</a>, <a href="https://foreverchanges.pro/fr/quest/2360/mathias-and-the-defias" target="_blank" rel="noopener">ForeverChanges</a></li>
+      <li>Armes : <a href="https://classicwowforever.com/fr/weapons/rogue/" target="_blank" rel="noopener">ClassicWoWForever</a>, <a href="https://wowclassicforever.info/fr/classes/rogue/weapons/" target="_blank" rel="noopener">WoWClassicForever.info</a>, <a href="https://foreverchanges.pro/fr/bis/level-20/rogue" target="_blank" rel="noopener">ForeverChanges BiS 20</a>, <a href="https://foreverchanges.pro/fr/bis/rogue" target="_blank" rel="noopener">ForeverChanges BiS 30</a></li>
+      <li>Parcours : <a href="https://conquestcapped.com/guides/fr/wow-forever/wow-forever-rogue-leveling/" target="_blank" rel="noopener">ConquestCapped</a>, <a href="https://wow4ever.quest/en/articles/guia-subida-20-30-wow-forever" target="_blank" rel="noopener">wow4ever.quest</a>, <a href="https://wowforeverguides.com/leveling/20-30" target="_blank" rel="noopener">WoWForeverGuides</a>, <a href="https://loreforeverwow.com/guides/wow-forever-alliance-leveling-zones" target="_blank" rel="noopener">Lore Forever</a></li>
+    </ul>
+    <p style="margin-top:8px">Le jeu est sorti le 4 novembre : quelques noms FR ne sont pas encore traduits dans le client ou varient selon les sites. Ils sont marqués d'un <span class="unsure">?<sup></sup></span> ou indiqués « nom FR non trouvé ».</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var MIN = 17, MAX = 40;
+
+  /* ---------- Noms ---------- */
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  /* st : 1 = FR vérifié, 0 = FR à confirmer, -1 = FR non trouvé */
+  function nm(fr, en, st, note){
+    var t = note ? ' title="' + esc(note) + '"' : "";
+    if (st === -1 || !fr) return '<span class="nofr"' + t + '>nom FR non trouvé</span> <span class="en">(' + esc(en) + ')</span>';
+    var enPart = (en && en !== fr) ? ' <span class="en">(' + esc(en) + ')</span>' : ' <span class="en">(' + esc(en || fr) + ')</span>';
+    if (st === 0) return '<span class="fr unsure"' + (t || ' title="Nom FR à confirmer en jeu"') + '>' + esc(fr) + '<sup>?</sup></span>' + enPart;
+    return '<span class="fr"' + t + '>' + esc(fr) + '</span>' + enPart;
+  }
+
+  /* ---------- Talents Combat ---------- */
+  var T = [
+    {id:"coup", tier:1, fr:"Achèvement", en:"Coup de Grace", max:3, eff:"+7 / 13 / 20 % de dégâts d'Éviscération."},
+    {id:"effi", tier:1, fr:"Attaques optimisées", en:"Efficient Strikes", max:2, eff:"Attaque pernicieuse et Hémorragie coûtent 3 puis 5 points d'énergie de moins."},
+    {id:"refl", tier:1, fr:"Réflexes-éclairs", en:"Lightning Reflexes", max:5, eff:"+1 % d'esquive par rang."},
+    {id:"punc", tier:2, fr:"Blessures transperçantes", en:"Puncturing Wounds", max:3, eff:"Critique de l'Attaque sournoise augmenté, chance d'un point de combo en plus. Utile seulement si tu joues dagues dans le dos."},
+    {id:"defl", tier:2, fr:"Déviation", en:"Deflection", max:3, eff:"+2 % de parade par rang. Ouvre Riposte."},
+    {id:"prec", tier:2, fr:"Précision", en:"Precision", max:3, eff:"+1 % de chances de toucher par rang."},
+    {id:"ispr", tier:2, fr:"Sprint amélioré", en:"Improved Sprint", max:2, eff:"50 % de chances que Sprint retire les ralentissements et immobilisations."},
+    {id:"endu", tier:3, fr:"Endurcissement", en:"Endurance", max:2, eff:"Temps de recharge de Sprint et d'Evasion réduit de 30 %."},
+    {id:"ripo", tier:3, fr:"Riposte", en:"Riposte", max:1, eff:"Après une parade : frappe à 150 % des dégâts de l'arme et désarme la cible 6 s."},
+    {id:"comp", tier:3, fr:"Sang-froid", en:"Composure", max:2, eff:"En garde (Poised) coûte 5 puis 10 points d'énergie de moins.", note:"Nom FR de ForeverChanges. Kami Labs écrit « Maîtrise de soi »."},
+    {id:"ikic", tier:4, fr:"Coup de pied amélioré", en:"Improved Kick", max:2, eff:"50 % de chances de réduire la cible au silence 2 s."},
+    {id:"flaw", tier:4, fr:"Exécution parfaite", en:"Flawless Execution", max:1, eff:"Éviscération coûte 15 points d'énergie de moins."},
+    {id:"wexp", tier:4, fr:"Expertise en armes", en:"Weapon Expertise", max:2, eff:"−1 % de chances que tes attaques soient esquivées ou parées."},
+    {id:"aggr", tier:4, fr:"Agressivité", en:"Aggression", max:3, eff:"+5 / 10 / 15 % de dégâts d'Attaque pernicieuse et d'Éviscération."},
+    {id:"dws",  tier:5, fr:"Spécialisation Ambidextrie", en:"Dual Wield Specialization", max:2, eff:"+25 / 50 % de dégâts de l'arme en main gauche."},
+    {id:"bf",   tier:5, fr:"Déluge de lames", en:"Blade Flurry", max:1, eff:"15 s : +20 % de vitesse d'attaque et tes coups touchent une cible proche en plus."},
+    {id:"hns",  tier:5, fr:"Taillader et trancher", en:"Hack and Slash", max:5, eff:"Bonus selon l'arme : attaque supplémentaire (épée, hache), critique (dague, poing), armure ignorée (masse)."},
+    {id:"fos",  tier:6, fr:null, en:"Flash of Steel", max:5, eff:"Surin (Shank) rend plus d'énergie et son temps de recharge baisse.", note:"Pas encore traduit dans le client selon ForeverChanges. Kami Labs l'appelle « Éclair d'acier »."},
+    {id:"ar",   tier:7, fr:"Poussée d'adrénaline", en:"Adrenaline Rush", max:1, eff:"+100 % de régénération d'énergie pendant 15 s."},
+    {id:"rema", tier:1, tree:"assa", fr:"Attaques impitoyables", en:"Remorseless Attacks", max:2, eff:"Après avoir tué un ennemi, +40 % de chances de critique sur ta prochaine technique génératrice de points de combo pendant 20 s (valeur du guide Wowhead ; ForeverChanges indique 20 %).", note:"Talent de l'arbre Assassinat, palier 1."}
+  ];
+  var TBY = {}; T.forEach(function(t){ TBY[t.id] = t; });
+  /* Placement dans la grille (colonne 1 à 4) */
+  var LAYOUT = {1:["coup","effi","refl",null], 2:["punc","defl","prec","ispr"], 3:["endu","ripo","comp",null], 4:["ikic","flaw","wexp","aggr"], 5:["dws","bf","hns",null], 6:[null,"fos",null,null], 7:[null,"ar",null,null]};
+  var PATH = {10:"effi",11:"effi",12:"rema",13:"rema",14:"coup",15:"coup",16:"coup",17:"prec",18:"prec",19:"defl",20:"defl",21:"defl",22:"ripo",23:"comp",24:"comp",25:"prec",26:"endu",27:"wexp",28:"wexp",29:"aggr",30:"aggr",31:"aggr",32:"bf",33:"dws",34:"dws",35:"flaw",36:"hns",37:"fos",38:"fos",39:"fos",40:"fos"};
+
+  function ranksAt(L){
+    var r = {}; T.forEach(function(t){ r[t.id] = 0; });
+    for (var lv = 10; lv <= L; lv++){ if (PATH[lv]) r[PATH[lv]]++; }
+    return r;
+  }
+  function levelsFor(id){
+    var out = []; for (var lv = 10; lv <= 40; lv++){ if (PATH[lv] === id) out.push(lv); }
+    return out;
+  }
+  function tname(t){ return t.fr ? nm(t.fr, t.en, 1, t.note) : nm(null, t.en, -1, t.note); }
+
+  /* ---------- Sorts du maître des voleurs ---------- */
+  /* [FR, EN, statut FR, note, "new"|"rank", obligatoire (true) / facultatif (false) / non classé (null)] selon Wowhead */
+  var SPELLS = {
+    16:[["Feinte","Feint",0,null,"new",false],["Éviscération","Eviscerate",1,null,"rank",true]],
+    18:[["Embuscade","Ambush",1,null,"new",false],["En garde","Poised",0,"Nom FR de ForeverChanges, pas encore traduit dans le client. Kami Labs écrit « Aplomb ». Passif.","new",null],["Suriner","Gouge",1,null,"rank",false]],
+    20:[["Rupture","Rupture",1,null,"new",false],["Camouflage","Stealth",1,null,"rank",true],["Attaque sournoise","Backstab",1,null,"rank",false]],
+    22:[["Disparition","Vanish",1,null,"new",true],["Distraction","Distract",0,null,"new",false],["Attaque pernicieuse","Sinister Strike",1,null,"rank",true],["Garrot","Garrote",1,null,"rank",false]],
+    24:[["Surin","Shank",0,"Nom FR de Kami Labs. ForeverChanges garde « Shank ». Nouveau sort Forever, rang 2 au niveau 44.","new",null],["Détection des pièges","Detect Traps",0,null,"new",false],["Éviscération","Eviscerate",1,null,"rank",true]],
+    26:[["Coup bas","Cheap Shot",1,null,"new",false],["Coup de pied","Kick",1,null,"rank",true],["Exposer l'armure","Expose Armor",1,null,"rank",false],["Embuscade","Ambush",1,null,"rank",false]],
+    28:[["Assommer","Sap",1,null,"rank",true],["Attaque sournoise","Backstab",1,null,"rank",false],["Feinte","Feint",0,null,"rank",false],["Rupture","Rupture",1,null,"rank",false]],
+    30:[["Aiguillon perfide","Kidney Shot",1,null,"new",false],["Désarmement de piège","Disarm Trap",0,null,"new",false],["Attaque pernicieuse","Sinister Strike",1,null,"rank",true],["Garrot","Garrote",1,null,"rank",false]],
+    32:[["Éviscération","Eviscerate",1,null,"rank",true],["Suriner","Gouge",1,null,"rank",false]],
+    34:[["Cécité","Blind",1,null,"new",false],["Sprint","Sprint",1,null,"rank",true],["Embuscade","Ambush",1,null,"rank",false]],
+    36:[["Attaque sournoise","Backstab",1,null,"rank",false],["Exposer l'armure","Expose Armor",1,null,"rank",false],["Rupture","Rupture",1,null,"rank",false]],
+    38:[["Attaque pernicieuse","Sinister Strike",1,null,"rank",true],["Garrot","Garrote",1,null,"rank",false]],
+    40:[["Chute amortie","Safe Fall",0,null,"new",false],["Camouflage","Stealth",1,null,"rank",true],["Éviscération","Eviscerate",1,null,"rank",true],["Feinte","Feint",0,null,"rank",false]]
+  };
+  function spellsHtml(arr){
+    function one(a){ return nm(a[0], a[1], a[2], a[2] !== 1 ? a[3] : null) + ' <span class="small">(' + (a[4] === "new" ? "nouveau" : "rang sup.") + ')</span>'; }
+    var m = arr.filter(function(a){ return a[5] === true; }), o = arr.filter(function(a){ return a[5] !== true; });
+    var out = [];
+    if (m.length) out.push('<b>Obligatoire :</b> ' + m.map(one).join(", "));
+    if (o.length) out.push('<span class="small"><b>Facultatif :</b></span> ' + o.map(one).join(", "));
+    return out.join('<br>');
+  }
+  var POISONS = {
+    20:[["Poison instantané","Instant Poison",1,"appris avec la quête"],["Poison affaiblissant","Crippling Poison",0]],
+    24:[["Poison de distraction mentale","Mind-numbing Poison",0]],
+    28:[["Poison instantané II","Instant Poison II",1]],
+    30:[["Poison mortel","Deadly Poison",1]],
+    32:[["Poison douloureux","Wound Poison",0]],
+    34:[["Poudre aveuglante","Blinding Powder",0]],
+    36:[["Poison instantané III","Instant Poison III",1]],
+    38:[["Poison mortel II","Deadly Poison II",1],["Poison de distraction mentale II","Mind-numbing Poison II",0]],
+    40:[["Poison douloureux II","Wound Poison II",0]]
+  };
+  function listNames(arr){
+    return arr.map(function(a){ return nm(a[0], a[1], a[2], a[3] && a[2] !== 1 ? a[3] : null) + (a[2] === 1 && a[3] ? ' <span class="small">(' + esc(a[3]) + ')</span>' : ""); }).join(", ");
+  }
+
+  /* ---------- Quêtes de classe ---------- */
+  var CLASSQ = [
+    {from:17, to:19, key:17, html: "Si tu ne l'as pas encore faite : la quête de crochetage du niveau 16 démarre chez Erion Shadewhisper à Darnassus, puis " + nm(null,"Redridge Rendezvous",-1) + " (Lucius, Lakeshire) et le coffre du moulin d'Alther aux " + nm("Carmines","Redridge Mountains",1) + ". Récompense : " + nm(null,"Certificate of Thievery",-1) + "."},
+    {from:20, to:24, key:20, html: "Poisons, chaîne Alliance : " + nm("Mathias et les Défias","Mathias and the Defias",0) + " chez Maître Mathias Shaw (Master Mathias Shaw), Vieille ville de Hurlevent. Puis " + nm("La Tour de Klaven","Klaven's Tower",1) + " chez l'agent Kearnen en " + nm("Marche de l'Ouest","Westfall",1) + " (68.5, 70.1), tour défias à l'est de la Colline des sentinelles. " + nm("Camouflage","Stealth",1) + ", " + nm("Vol à la tire","Pick Pocket",0) + " sur un Malformed Defias Drone pour la clé, puis " + nm("Assommer","Sap",1) + " ou tue Klaven Mortwake (élite, donnée niveau 24 par forg.gg : dur en solo à 20). Le coffre donne les poisons, mais aussi un affaiblissement de 7 jours qui gêne le camouflage : " + nm("Le toucher de Zanzil","The Touch of Zanzil",0) + " (Doc Mixilpixil, caserne de Hurlevent) le retire, un druide ou un chaman aussi."},
+    {from:23, to:30, key:23, html: "Boîte aux lettres de C : " + nm(null,"The Horn of Xelthos",-1) + ", nouvelle en Forever. Point de dépôt près de Bois-du-Bûcher (Pyrewood), " + nm("Forêt des Pins argentés","Silverpine Forest",1) + " (47.1, 71.1). Crochets chez Veenix aux " + nm("Serres-Rocheuses","Stonetalon Mountains",1) + ", puis " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + " en solo (vol à la tire sur le frère et la sœur pour les deux demi-clés). Récompense : " + nm("Chevalière de Bois-du-Bûcher","Pyrewood Signet Ring",1) + ", bague réservée aux voleurs. Attention : tout se passe en territoire Horde (Pins argentés), à faire en camouflage ou à laisser de côté."},
+    {from:24, to:33, key:24, html: "Ravenholdt : " + nm(null,"Syndicate Sabotage",-1) + " chez Myrokos Silentform, manoir de Ravenholdt (Ravenholdt Manor, 85.0, 80.4) dans les montagnes d'Alterac (Alterac Mountains) : tuer Lord Tomas au fort de Durnholde (Durnholde Keep). Suite de la chaîne aux niveaux 34 et 36."},
+    {from:30, to:40, key:30, html: "Lettre de C (la plupart la reçoivent vers 30, ForeverChanges la donne dès 25) : " + nm(null,"The Eye of Bhossca",-1) + ", en solo au " + nm("Monastère écarlate","Scarlet Monastery",1) + " (Cimetière puis Bibliothèque). Récompense : " + nm("Lame ornée de rubis","Ruby-Adorned Blade",1) + ", épée à une main rare réservée aux voleurs. Le Monastère écarlate est en territoire Horde (Tirisfal) : l'entrée se fait en camouflage."}
+  ];
+
+  /* ---------- Parcours ---------- */
+  var ROUTE = [
+    {a:17, b:18, zone:nm("Forgefer et Loch Modan","Ironforge, Loch Modan",1), hub:"Thelsamar", txt:"Salle des Thanes en groupe, quêtes de Dun Morogh et de Forgefer pour le donjon, fin du Loch Modan. " + nm(null,"Twisting the Knife",-1) + " donne " + nm("Dague-croc de Daguecroc","Daggerfang's Daggerfang",1) + " et " + nm(null,"A Dark Threat Looms",-1) + " donne " + nm("Aiguillon","Thornblade",1) + "."},
+    {a:18, b:21, zone:nm("Hurlevent et Marche de l'Ouest","Stormwind, Westfall",1), hub:"Tram depuis Forgefer", txt:nm("Mortemines","The Deadmines",1) + " pour la " + nm("Lame de cruauté","Cruel Barb",1) + ". Au 20, chaîne des poisons (Hurlevent puis Marche de l'Ouest). Apprends Épées chez Woo Ping."},
+    {a:20, b:23, zone:nm("Les Carmines","Redridge Mountains",1), hub:nm("Comté-du-Lac","Lakeshire",0), txt:"Hub court et dense, idéal entre deux passages à Hurlevent."},
+    {a:22, b:26, zone:nm("Les Paluns","Wetlands",1), hub:nm("Port de Menethil","Menethil Harbor",0), txt:"Plus de 50 quêtes dont des nouvelles en Forever. Garde la chaîne de Thandol (Thandol Span) pour le 28. Bateau vers Auberdine pour rentrer en Kalimdor."},
+    {a:23, b:28, zone:nm("Orneval","Ashenvale",1), hub:"Astranaar", txt:"Grosse zone elfe, nouvelles quêtes Forever. " + nm("Profondeurs de Brassenoire","Blackfathom Deeps",1) + " juste à côté. " + nm("Sombrivage","Darkshore",1) + " en appoint si tu manques de quêtes."},
+    {a:24, b:29, zone:nm("Bois de la Pénombre","Duskwood",1), hub:nm("Sombre-Comté","Darkshire",0), txt:"La zone la plus riche (environ 85 quêtes). Enchaîne avec " + nm("Excavations : les Paluns","Excavation Site: Wetlands",1) + " et " + nm("La Prison","The Stockade",1) + "."},
+    {a:28, b:33, zone:nm("Contreforts de Hautebrande et Alterac","Hillsbrad Foothills, Alterac Mountains",0), hub:nm("Austrivage","Southshore",0), txt:nm("Cité de Dalaran","City of Dalaran",1) + " (nouveau donjon), suite de Ravenholdt, puis " + nm("Hautes-terres Arathies","Arathi Highlands",1) + " et " + nm("Vallée de Strangleronce","Stranglethorn Vale",1) + " vers 30."}
+  ];
+
+  /* ---------- Donjons ---------- */
+  var DJ = [
+    {fr:"Salle des Thanes", en:"Hall of Thanes", a:13, b:18, st:1, where:"Forgefer"},
+    {fr:"Mortemines", en:"The Deadmines", a:18, b:24, st:1, where:"Marche de l'Ouest"},
+    {fr:"Donjon d'Ombrecroc", en:"Shadowfang Keep", a:23, b:29, st:1, where:"Pins argentés", terr:true},
+    {fr:"Excavations : les Paluns", en:"Excavation Site: Wetlands", a:24, b:29, st:1, where:"Les Paluns, nouveau"},
+    {fr:"Profondeurs de Brassenoire", en:"Blackfathom Deeps", a:25, b:31, st:1, where:"Orneval"},
+    {fr:"La Prison", en:"The Stockade", a:26, b:32, st:1, where:"Hurlevent"},
+    {fr:"Cité de Dalaran", en:"City of Dalaran", a:28, b:33, st:1, where:"Alterac, nouveau"},
+    {fr:"Kraal de Tranchebauge", en:"Razorfen Kraul", a:30, b:36, st:1, where:"Les Tarides", terr:true},
+    {fr:"Gnomeregan", en:"Gnomeregan", a:31, b:37, st:1, where:"Dun Morogh"},
+    {fr:"Monastère écarlate : Cimetière", en:"Scarlet Monastery: Graveyard", a:31, b:37, st:1, where:"Tirisfal", terr:true}
+  ];
+
+  /* ---------- Objets ---------- */
+  /* cat : melee | ranged | armor ; lv : niveau requis (ou niveau conseillé si lvNote) */
+  var ITEMS = [
+    {id:281257, icon:"inv_weapon_shortblade_04", cat:"melee", kind:"dagger", fr:"Dague-croc de Daguecroc", en:"Daggerfang's Daggerfang", st:1, q:2, slot:"À une main · Dague", dmg:"9 - 18", spd:"1,70", dps:7.94, stats:["+2 Agilité"], lv:14, lvNote:"selon ClassicWoWForever", src:"Quête " + nm(null,"Twisting the Knife",-1) + ", Loch Modan"},
+    {id:279894, icon:"inv_weapon_rifle_01", cat:"ranged", kind:"gun", fr:"Tromblon calibré", en:"Calibrated Blunderbuss", st:1, q:3, slot:"À distance · Arme à feu", dmg:"15 - 29", spd:"2,30", dps:9.57, stats:["+3 Endurance"], lv:14, lvNote:"quête niv. 16", src:"Quête " + nm("Incursion dans le Vieux Forgefer","Old Ironforge Incursion",1) + ", Salle des Thanes"},
+    {id:null, cat:"armor", kind:"legs", fr:"Chausses creuses-tombes", en:"Deepgrave Trousers", st:1, q:0, slot:"Jambes · Cuir", lv:15, lvNote:"quête niv. 15", src:"Quête " + nm("Une rancune ancestrale","An Ancient Grudge",1) + ", Salle des Thanes", nodata:true},
+    {id:null, cat:"armor", kind:"belt", fr:"Ceinture poussiéreuse", en:"Dusty Belt", st:1, q:0, slot:"Taille · Cuir", lv:15, lvNote:"quête niv. 15", src:"Quête " + nm("Les morts sans repos","The Restless Dead",1) + ", Salle des Thanes", nodata:true},
+    {id:6448, icon:"inv_weapon_shortblade_10", terr:true, cat:"melee", kind:"dagger", fr:"Dard", en:"Tail Spike", st:1, q:3, slot:"À une main · Dague", dmg:"17 - 33", spd:"1,80", dps:13.89, stats:["+3 Force","+3 Agilité"], lv:16, src:"Skum, " + nm("Cavernes des lamentations","Wailing Caverns",1) + " (Les Tarides)"},
+    {id:285292, icon:"inv_misc_sawblade_01", cat:"ranged", kind:"saw", fr:"Lame de scie émoussée", en:"Dull Sawblade", st:1, q:3, slot:"Armes de jet", dmg:"15 - 28", spd:"1,70", dps:12.65, stats:["+2 Endurance"], eff:["Équipé : +6 à la puissance d'attaque."], lv:16, src:"Sneed's Shredder, " + nm("Mortemines","The Deadmines",1)},
+    {id:2089, icon:"inv_weapon_shortblade_01", cat:"melee", kind:"dagger", fr:"Dague Scrimshaw", en:"Scrimshaw Dagger", st:1, q:2, slot:"À une main · Dague", dmg:"12 - 23", spd:"1,80", dps:9.72, stats:["+2 Endurance"], lv:17, lvNote:"quête niv. 17", src:"Quête " + nm(null,"Red Silk Bandanas",-1) + ", " + nm("Mortemines","The Deadmines",1)},
+    {id:2908, icon:"inv_weapon_shortblade_15", cat:"melee", kind:"dagger", fr:"Aiguillon", en:"Thornblade", st:1, q:2, slot:"À une main · Dague", dmg:"11 - 21", spd:"1,60", dps:10.00, stats:["+3 Agilité"], lv:18, lvNote:"quête niv. 20", src:"Quête " + nm(null,"A Dark Threat Looms",-1) + ", Loch Modan"},
+    {id:6633, icon:"inv_sword_16", terr:true, cat:"melee", kind:"sword", fr:"Hachoir du boucher", en:"Butcher's Slicer", st:1, q:3, slot:"À une main · Épée", dmg:"30 - 57", spd:"2,90", dps:15.00, stats:["+3 Endurance"], eff:["Équipé : +6 à la puissance d'attaque."], lv:18, src:"Tranchegriffe le Boucher (Razorclaw the Butcher), " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + ", environ 42 % en Classic"},
+    {id:5191, icon:"inv_sword_24", cat:"melee", kind:"sword", fr:"Lame de cruauté", en:"Cruel Barb", st:1, q:3, slot:"À une main · Épée", dmg:"30 - 57", spd:"2,80", dps:15.54, stats:[], eff:["Équipé : +12 à la puissance d'attaque."], lv:19, src:"Edwin VanCleef, " + nm("Mortemines","The Deadmines",1) + ", environ 20 %", star:true},
+    {id:1292, icon:"inv_axe_23", terr:true, cat:"melee", kind:"axe", fr:"Fendoir du Boucher", en:"Butcher's Cleaver", st:1, q:3, slot:"À une main · Hache", dmg:"19 - 36", spd:"1,70", dps:16.18, stats:["+5 Force","+2 Agilité"], lv:20, src:"Tranchegriffe le Boucher (Razorclaw the Butcher), " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + ", environ 10 %"},
+    {id:2041, icon:"inv_chest_leather_07", cat:"armor", kind:"chest", fr:"Tunique de la marche de l'Ouest", en:"Tunic of Westfall", st:1, q:3, slot:"Torse · Cuir", armor:92, stats:["+11 Agilité","+5 Endurance"], lv:18, lvNote:"conseillé au 20", src:"Quête " + nm(null,"The Defias Brotherhood",-1) + ", Marche de l'Ouest"},
+    {id:null, cat:"armor", kind:"belt", fr:"Ceinture défias noircie", en:"Blackened Defias Belt", st:1, q:0, slot:"Taille · Cuir", lv:18, lvNote:"conseillé au 20", src:"Captain Greenskin, " + nm("Mortemines","The Deadmines",1), nodata:true},
+    {id:273637, icon:"inv_sword_05", terr:true, cat:"melee", kind:"sword", fr:"Lame d'Argelaine", en:"Blade of Silverlaine", st:1, q:3, slot:"Main droite · Épée", dmg:"17 - 33", spd:"2,30", dps:10.87, stats:["+6 résistance à l'Ombre"], eff:["Équipé : +28 aux dégâts et soins des sorts."], lv:21, src:"Baron Silverlaine, " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + ", moins de 2 %", caster:true},
+    {id:3463, icon:"ability_upgrademoonglaive", cat:"ranged", kind:"thrown", fr:"Etoile d'argent", en:"Silver Star", st:1, q:2, slot:"Armes de jet", dmg:"26 - 49", spd:"2,30", dps:16.30, stats:["+4 Agilité"], lv:22, src:"Quête " + nm(null,"Scramble",-1) + ", Les Serres-Rocheuses (Stonetalon). Un site la classe côté Horde : à vérifier en jeu"},
+    {id:6220, icon:"inv_weapon_shortblade_25", terr:true, cat:"melee", kind:"dagger", fr:"Fragment de météore", en:"Meteor Shard", st:1, q:3, slot:"À une main · Dague", dmg:"22 - 42", spd:"1,80", dps:17.78, stats:["+3 résistance au Feu"], eff:["Chances quand vous touchez : inflige 42 points de dégâts de Feu.", "Unique - Équipé"], lv:23, src:"Archimage Arugal (Archmage Arugal), " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1)},
+    {id:6904, icon:"inv_misc_monsterfang_01", cat:"melee", kind:"fang", fr:"Morsure de Serra'kis", en:"Bite of Serra'kis", st:1, q:3, slot:"À une main · Dague", dmg:"16 - 30", spd:"1,30", dps:17.69, stats:["+2 résistance à la Nature"], eff:["Chances quand vous touchez : poison, 14 dégâts de Nature toutes les 3 s pendant 9 s."], lv:23, src:"Old Serra'kis, " + nm("Profondeurs de Brassenoire","Blackfathom Deeps",1)},
+    {id:277210, icon:"inv_jewelry_ring_02", terr:true, cat:"armor", kind:"ring", fr:"Chevalière de Bois-du-Bûcher", en:"Pyrewood Signet Ring", st:1, q:3, slot:"Doigt", stats:["+4 Agilité","+4 Endurance"], eff:["Équipé : +0,4 % de chances de toucher."], lv:23, lvNote:"quête de classe", src:"Quête " + nm(null,"The Horn of Xelthos",-1) + ", Pins argentés"},
+    {id:273827, icon:"inv_sword_24", cat:"melee", kind:"sword", fr:"Collecteuse de dettes", en:"Debt Collector", st:1, q:3, slot:"Main droite · Épée", dmg:"21 - 39", spd:"2,30", dps:13.04, stats:[], eff:["Équipé : +34 aux dégâts et soins des sorts."], lv:26, src:"Bazil Thredd, " + nm("La Prison","The Stockade",1), caster:true},
+    {id:9453, icon:"inv_weapon_shortblade_02", cat:"melee", kind:"dagger", fr:"Vengeresse empoisonnée", en:"Toxic Revenger", st:1, q:3, slot:"À une main · Dague", dmg:"27 - 51", spd:"1,90", dps:20.53, stats:[], eff:["Chances quand vous touchez : nuage toxique, 14 dégâts de Nature toutes les 3 s pendant 12 s.", "Unique - Équipé"], lv:27, src:"Retombée visqueuse (Viscous Fallout), Gnomeregan"},
+    {id:6681, icon:"inv_weapon_shortblade_10", terr:true, cat:"melee", kind:"dagger", fr:"Fleur d'épines", en:"Thornspike", st:1, q:3, slot:"À une main · Dague", dmg:"24 - 46", spd:"1,70", dps:20.59, stats:[], eff:["Chances quand vous touchez : épines de 45 dégâts qui rebondissent sur un ennemi proche."], lv:27, src:"Aggem Malépine (Aggem Thorncurse), " + nm("Kraal de Tranchebauge","Razorfen Kraul",1)},
+    {id:7682, icon:"inv_spear_01", terr:true, cat:"melee", kind:"dagger", fr:"Tisonnier de torture", en:"Torturing Poker", st:1, q:3, slot:"À une main · Dague", dmg:"22 - 45", spd:"1,70", dps:19.63, stats:[], eff:["Équipé : tes coups empilent une brûlure, jusqu'à 10 fois.", "Unique - Équipé"], lv:29, src:"Interrogateur Vislar (Interrogator Vishas), " + nm("Monastère écarlate","Scarlet Monastery",1) + ", environ 10 %"},
+    {id:7683, icon:"inv_gauntlets_11", terr:true, cat:"melee", kind:"fist", fr:"Coup de poing sanglant en laiton", en:"Bloody Brass Knuckles", st:1, q:3, slot:"À une main · Arme de pugilat", dmg:"24 - 46", spd:"1,60", dps:21.88, stats:[], eff:["Équipé : +12 à la puissance d'attaque.", "Équipé : +15 à la puissance d'attaque contre les humanoïdes."], lv:29, src:"Interrogateur Vislar (Interrogator Vishas), " + nm("Monastère écarlate","Scarlet Monastery",1)},
+    {id:277246, icon:"inv_sword_07", terr:true, cat:"melee", kind:"sword", fr:"Lame ornée de rubis", en:"Ruby-Adorned Blade", st:1, q:3, slot:"À une main · Épée", dmg:"38 - 72", spd:"2,30", dps:23.91, stats:["+3 Agilité","+8 Endurance"], lv:30, lvNote:"lettre de C vers 30", src:"Quête de classe " + nm(null,"The Eye of Bhossca",-1) + ", solo au Monastère écarlate", star:true},
+    {id:281314, icon:"inv_weapon_shortblade_01", cat:"melee", kind:"dagger", fr:"Croc de Dragon soumis", en:"Subdued Dragon's Fang", st:1, q:3, slot:"À une main · Dague", dmg:"24 - 46", spd:"1,70", dps:20.59, stats:["+7 Agilité","+2 Endurance"], lv:32, src:"Quête élite " + nm(null,"Stopping the Cycle",-1) + ", Les Paluns (dès 24)"},
+    {id:6829, icon:"inv_sword_27", terr:true, cat:"melee", kind:"sword", fr:null, en:"Sword of Serenity", st:-1, q:3, slot:"À une main · Épée", dmg:"46 - 86", spd:"2,20", dps:30.00, stats:["+9 Endurance","+4 Esprit"], lv:37, lvNote:"pas encore traduit en jeu", src:"Quête " + nm(null,"In the Name of the Light",-1) + ", Monastère écarlate (niv. 40)"},
+    {id:10823, icon:"inv_sword_35", terr:true, cat:"melee", kind:"sword", fr:null, en:"Vanquisher's Sword", st:-1, q:3, slot:"À une main · Épée", dmg:"46 - 86", spd:"2,20", dps:30.00, stats:[], eff:["Équipé : +22 à la puissance d'attaque."], lv:39, lvNote:"pas encore traduit en jeu", src:"Quête " + nm(null,"Bring the Light",-1) + ", Souilles de Tranchebauge (Razorfen Downs), niv. 42"}
+  ];
+  var ICONS = {
+    sword:'<path d="M14.5 22.5L31 6h3v3L17.5 25.5z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M16.2 23.8L32.5 7.5" stroke="#fff" stroke-opacity=".6" stroke-width=".7"/><path d="M9.5 20.5l10 10" stroke="#14161d" stroke-width="5" stroke-linecap="round"/><path d="M9.5 20.5l10 10" stroke="url(#gGold)" stroke-width="3.2" stroke-linecap="round"/><path d="M13.6 26.4L7.5 32.5" stroke="#14161d" stroke-width="4.2" stroke-linecap="round"/><path d="M13.6 26.4L7.5 32.5" stroke="#6a4120" stroke-width="2.6" stroke-linecap="round"/><path d="M12 28l1 1M10.4 29.6l1 1" stroke="#c99a5a" stroke-width=".8"/><circle cx="6.4" cy="33.6" r="2.6" fill="url(#gGold)" stroke="#14161d" stroke-width=".9"/><circle cx="14.5" cy="25.5" r="1.4" fill="url(#gGem)"/>',
+    dagger:'<path d="M17 20.5L28 9.5h3.5v3.5L20.5 24z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M18.8 22.2L30 11" stroke="#fff" stroke-opacity=".6" stroke-width=".7"/><path d="M13 19l9 9" stroke="#14161d" stroke-width="4.6" stroke-linecap="round"/><path d="M13 19l9 9" stroke="url(#gGold)" stroke-width="2.8" stroke-linecap="round"/><path d="M16.5 25.5L10.5 31.5" stroke="#14161d" stroke-width="4.2" stroke-linecap="round"/><path d="M16.5 25.5L10.5 31.5" stroke="#3a2a1a" stroke-width="2.6" stroke-linecap="round"/><path d="M14.6 27.4l1 1M13 29l1 1" stroke="#8a6a44" stroke-width=".8"/><circle cx="9.4" cy="32.6" r="2.3" fill="url(#gGold)" stroke="#14161d" stroke-width=".9"/>',
+    axe:'<path d="M8 34L27 12" stroke="#14161d" stroke-width="4.4" stroke-linecap="round"/><path d="M8 34L27 12" stroke="url(#gWood)" stroke-width="2.8" stroke-linecap="round"/><path d="M21.5 9.5C27 3.5 35 6 35.5 14.5C31 13.5 27.5 14.5 25.5 17.5z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M24 10.5C28 7.5 33 9 34 13" stroke="#fff" stroke-opacity=".55" stroke-width=".8" fill="none"/><path d="M23 15.5l-4-1 1.5-3.5z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".8"/><path d="M12 29.4l1.6 1.4M10.6 31l1.6 1.4" stroke="#2a1a0c" stroke-width="1"/>',
+    fist:'<path d="M9 12l2-4 2 4M15 12l2-4 2 4M21 12l2-4 2 4M27 12l2-4 2 4" fill="url(#gMetal)" stroke="#14161d" stroke-width=".8" stroke-linejoin="round"/><rect x="6" y="11.5" width="28" height="11" rx="5" fill="url(#gBrass)" stroke="#14161d" stroke-width="1"/><circle cx="11" cy="17" r="2.4" fill="#0b0c11"/><circle cx="17" cy="17" r="2.4" fill="#0b0c11"/><circle cx="23" cy="17" r="2.4" fill="#0b0c11"/><circle cx="29" cy="17" r="2.4" fill="#0b0c11"/><path d="M12 22.5c2 7 14 7 16 0" fill="url(#gBrass)" stroke="#14161d" stroke-width="1"/><path d="M9 13.5h22" stroke="#fff3c0" stroke-opacity=".6" stroke-width=".8"/><path d="M14 27c2 1.6 10 1.6 12 0" stroke="#7a1010" stroke-width="1.4" fill="none"/>',
+    thrown:'<path d="M20 3l4 12 12 5-12 4-4 13-4-13-12-4 12-5z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M20 3l1.3 12M36 20l-12 0.6" stroke="#fff" stroke-opacity=".6" stroke-width=".7"/><circle cx="20" cy="20" r="4" fill="#232634" stroke="url(#gGold)" stroke-width="1.6"/><circle cx="20" cy="20" r="1.4" fill="url(#gGem)"/>',
+    saw:'<circle cx="20" cy="20" r="14" fill="none" stroke="#14161d" stroke-width="4.5" stroke-dasharray="3.2 2.3"/><circle cx="20" cy="20" r="14" fill="none" stroke="url(#gMetal)" stroke-width="3" stroke-dasharray="3.2 2.3"/><circle cx="20" cy="20" r="11.5" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9"/><circle cx="20" cy="20" r="7" fill="none" stroke="#5d6475" stroke-width=".8"/><circle cx="20" cy="20" r="3" fill="#0b0c11" stroke="url(#gBrass)" stroke-width="1.2"/><path d="M12 14a10 10 0 0 1 8-5" stroke="#fff" stroke-opacity=".65" stroke-width=".9" fill="none"/>',
+    gun:'<path d="M3 14.5h27v4.5H3z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9"/><path d="M30 13h5.5v7.5H30z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9"/><path d="M14 19h16v3.5l-6 2.5-4 9.5h-6.5l2.5-10H14z" fill="url(#gWood)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M4 15.6h25" stroke="#fff" stroke-opacity=".55" stroke-width=".7"/><path d="M21 22.5c0 2.5 2 3 3.5 2.5" stroke="#14161d" stroke-width="1.1" fill="none"/><rect x="18" y="12" width="5" height="2.5" rx=".8" fill="url(#gBrass)" stroke="#14161d" stroke-width=".6"/>',
+    ring:'<ellipse cx="20" cy="23" rx="11" ry="10" fill="none" stroke="#14161d" stroke-width="5.6"/><ellipse cx="20" cy="23" rx="11" ry="10" fill="none" stroke="url(#gGold)" stroke-width="3.8"/><path d="M11.5 18.5a10 9 0 0 1 6-5" stroke="#fff7d0" stroke-opacity=".7" stroke-width="1" fill="none"/><path d="M14.5 13l5.5-7 5.5 7-5.5 4z" fill="url(#gRuby)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M17 12l3-3.5" stroke="#fff" stroke-opacity=".7" stroke-width=".8"/>',
+    chest:'<path d="M14 5l-9 5 2.5 8 4-1.5V35h17V16.5l4 1.5 2.5-8-9-5c-1 3-3 4.5-6 4.5s-5-1.5-6-4.5z" fill="url(#gLeather)" stroke="#14161d" stroke-width="1" stroke-linejoin="round"/><path d="M20 10v25" stroke="#2a180a" stroke-width="1"/><path d="M11.5 24h17M11.5 29h17" stroke="#c99a5a" stroke-width=".8" stroke-dasharray="1.6 1.2"/><circle cx="20" cy="15" r="1.3" fill="url(#gGold)"/><circle cx="20" cy="20" r="1.3" fill="url(#gGold)"/><path d="M8 11l4-2" stroke="#e0b080" stroke-opacity=".6" stroke-width=".9"/>',
+    belt:'<rect x="2" y="15" width="36" height="10" rx="2" fill="url(#gLeather)" stroke="#14161d" stroke-width="1"/><path d="M3 17.5h34M3 22.5h34" stroke="#c99a5a" stroke-width=".7" stroke-dasharray="1.6 1.2"/><rect x="14.5" y="12" width="11" height="16" rx="2" fill="none" stroke="#14161d" stroke-width="4"/><rect x="14.5" y="12" width="11" height="16" rx="2" fill="none" stroke="url(#gGold)" stroke-width="2.4"/><path d="M20 14v12" stroke="url(#gMetal)" stroke-width="1.6"/><circle cx="31" cy="20" r="1.2" fill="#14161d"/>',
+    legs:'<path d="M9 5h22l2.5 30h-8.5L20 15.5 15 35H6.5z" fill="url(#gLeather)" stroke="#14161d" stroke-width="1" stroke-linejoin="round"/><path d="M9 9h22" stroke="#14161d" stroke-width="2.4"/><path d="M9 9h22" stroke="url(#gBrass)" stroke-width="1.2"/><path d="M12 13l-3 19M28 13l3 19" stroke="#c99a5a" stroke-width=".7" stroke-dasharray="1.6 1.2"/><path d="M11 6.5l3 0" stroke="#e0b080" stroke-opacity=".6" stroke-width=".9"/>',
+    fang:'<path d="M9 6c9 1 19 6 21 16c1.4 6-1.6 11-5 13c1-6-1-12-6-16S10 12 9 6z" fill="url(#gBone)" stroke="#14161d" stroke-width="1" stroke-linejoin="round"/><path d="M12 8.5c7 2 13 6 15.5 12" stroke="#fff" stroke-opacity=".7" stroke-width=".9" fill="none"/><path d="M27 31c1 1.6 0 4-2 4" stroke="#14161d" stroke-width="1"/><circle cx="25.5" cy="33.5" r="2.4" fill="url(#gVenom)" stroke="#14161d" stroke-width=".7"/><path d="M8 7c-2 3-1 6 2 7" stroke="#6a4120" stroke-width="2.4" stroke-linecap="round" fill="none"/>'
+  };
+  /* Icône officielle chargée directement par ton navigateur depuis Wowhead ; si elle ne charge pas (page publiée, hors ligne), l'icône dessinée reste visible. */
+  function icon(it){
+    var img = it.icon ? '<img class="icoimg" src="https://wow.zamimg.com/images/wow/icons/large/' + it.icon + '.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">' : '';
+    return '<span class="ico q' + (it.q || 0) + '" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none">' + (ICONS[it.kind] || ICONS.dagger) + '</svg>' + img + '</span>';
+  }
+  document.addEventListener("error", function(e){ var t = e.target; if (t && t.classList && t.classList.contains("icoimg")) t.remove(); }, true);
+  function qname(it){
+    var inner = nm(it.fr, it.en, it.st);
+    return '<span class="qn q' + (it.q || 0) + '">' + inner + '</span>';
+  }
+  function fmt(n){ return n.toFixed(1).replace(".", ","); }
+  function tooltip(it){
+    var t = '<div class="tip">';
+    t += '<span class="tq' + (it.q || 0) + '">' + esc(it.fr || it.en) + '</span>';
+    if (it.fr && it.en !== it.fr) t += '<span style="color:#9aa0b5;font-style:italic">' + esc(it.en) + '</span>';
+    if (it.nodata){
+      t += '<span class="cav">Fiche complète introuvable dans la base Wowhead Forever pour l\'instant.</span>';
+    } else {
+      t += '<span>' + esc(it.slot) + '</span>';
+      if (it.dmg) t += '<span class="row"><span>Dégâts ' + esc(it.dmg) + '</span><span>Vitesse ' + esc(it.spd) + '</span></span><span>(' + fmt(it.dps).replace(",", ",") + ' dégâts par seconde)</span>';
+      if (it.armor) t += '<span>Armure : ' + it.armor + '</span>';
+      (it.stats || []).forEach(function(s){ t += '<span>' + esc(s) + '</span>'; });
+      (it.eff || []).forEach(function(s){ t += '<span class="eff">' + esc(s) + '</span>'; });
+      if (it.caster) t += '<span class="cav">Bonus de sorts : arme de lanceur, faible pour un voleur.</span>';
+    }
+    t += '<span class="lvl">' + (it.lvNote ? "Niveau conseillé " + it.lv + " (" + esc(it.lvNote) + ")" : "Niveau " + it.lv + " requis") + '</span>';
+    t += '<span class="src">' + it.src + '</span>';
+    if (it.id) t += '<span class="src"><a href="https://www.wowhead.com/forever/fr/item=' + it.id + '" target="_blank" rel="noopener">Voir sur Wowhead (icône officielle)</a></span>';
+    return t + '</div>';
+  }
+
+  /* ---------- État ---------- */
+  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true;
+  try { if (localStorage.getItem("voleur-horde") === "0") hideH = false; } catch(e){}
+  try { var s = parseInt(localStorage.getItem("voleur-lvl"), 10); if (s >= MIN && s <= MAX) L = s; } catch(e){}
+  try { var dq = JSON.parse(localStorage.getItem("voleur-thanes") || "{}"); if (dq && typeof dq === "object") doneQ = dq; } catch(e){}
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function setLevel(v){
+    v = Math.max(MIN, Math.min(MAX, v|0));
+    L = v;
+    try { localStorage.setItem("voleur-lvl", String(L)); } catch(e){}
+    render();
+  }
+
+  /* ---------- Rendu : au niveau ---------- */
+  function renderNow(){
+    $("lvlv").textContent = L;
+    $("lvlr").value = L;
+    $("minus").disabled = L <= MIN;
+    $("plus").disabled = L >= MAX;
+    $("nowTitle").textContent = "Au niveau " + L;
+    var rr = ranksAt(L), ca = 0, aa = 0; T.forEach(function(t){ if (t.tree === "assa") aa += rr[t.id]; else ca += rr[t.id]; });
+    $("pts").innerHTML = "<b class=\"mono\">" + (L - 9) + "</b> points de talent · Combat <b class=\"mono\">" + ca + "</b> · Assassinat <b class=\"mono\">" + aa + "</b>";
+
+    var r = ranksAt(L), items = [];
+    var tid = PATH[L], t = TBY[tid];
+    if (t){
+      items.push(["Talent", "Place ton point dans <span class=\"talent-pill\">" + (t.fr ? esc(t.fr) : esc(t.en)) + " <span class=\"en\">(" + esc(t.en) + ")</span></span> <span class=\"mono small\">" + r[tid] + "/" + t.max + "</span>" + (t.fr ? "" : " <span class=\"nofr\">nom FR non traduit en jeu</span>")]);
+    }
+    if (SPELLS[L]) items.push(["Maître voleur", spellsHtml(SPELLS[L])]);
+    else items.push(["Maître voleur", "<span class=\"small\">Rien à apprendre : les sorts et rangs tombent aux niveaux pairs.</span>"]);
+    if (L === 17) items.push(["Rappel", "Vérifie que tu as appris au 16 : " + spellsHtml(SPELLS[16])]);
+    if (L === 17) items.push(["Ton arbre", "Au 17, le parcours Wowhead donne : Attaques optimisées 2/2, Attaques impitoyables 2/2 (arbre Assassinat), Achèvement 3/3, Précision 1/3. Si tu as suivi l'ancien parcours du carnet (Précision 3/3, pas d'Attaques impitoyables), pas besoin de réinitialiser maintenant : fais-le au 20 (voir le conseil du niveau 20)."]);
+    if (L === 20) items.push(["Conseil", "Option du guide Wowhead : réinitialise tes talents chez le maître des voleurs pour prendre " + nm("Riposte","Riposte",1) + " tout de suite (Attaques optimisées 2, Achèvement 3, Précision 2, Déviation 3, Riposte 1), puis remets 2 points dans " + nm("Attaques impitoyables","Remorseless Attacks",1) + " aux niveaux 21 et 22. L'arbre ci-dessous garde l'ordre simple, sans réinitialisation."]);
+    if (POISONS[L]) items.push(["Poisons", listNames(POISONS[L]) + (L > 20 ? " <span class=\"small\">(chez le maître voleur, composants chez Kyrai à Darnassus)</span>" : "")]);
+    var cq = CLASSQ.filter(function(q){ return L >= q.from && L <= q.to; });
+    cq.forEach(function(q){ items.push([q.key === L ? "Quête de classe" : "Quête de classe en cours", q.html]); });
+    var z = ROUTE.filter(function(s){ return L >= s.a && L <= s.b; });
+    if (z.length) items.push(["Où aller", z.map(function(s){ return s.zone; }).join(" ou ")]);
+    var d = DJ.filter(function(x){ return L >= x.a && L <= x.b && !(hideH && x.terr); });
+    if (d.length) items.push(["Donjons", d.map(function(x){ return nm(x.fr, x.en, x.st); }).join(", ")]);
+
+    $("nowList").innerHTML = items.map(function(i){ return "<li><span class=\"tag\">" + i[0] + "</span><div>" + i[1] + "</div></li>"; }).join("");
+
+    var nx = [];
+    for (var lv = L + 1; lv <= Math.min(MAX, L + 5); lv++){
+      var bits = [], tt = TBY[PATH[lv]];
+      if (tt) bits.push((tt.fr ? esc(tt.fr) : esc(tt.en)) + " <span class=\"en\">(" + esc(tt.en) + ")</span>");
+      if (SPELLS[lv]) bits.push("sorts : " + SPELLS[lv].filter(function(a){ return a[4] === "new" || a[5] === true; }).map(function(a){ return esc(a[0]); }).join(", "));
+      if (POISONS[lv]) bits.push("poisons");
+      CLASSQ.forEach(function(q){ if (q.key === lv) bits.push("quête de classe"); });
+      nx.push("<li><span class=\"mono\">" + lv + "</span><span>" + bits.join(" · ") + "</span></li>");
+    }
+    $("nextList").innerHTML = nx.length ? nx.join("") : "<li><span class=\"mono\">40</span><span>Fin de l'outil. Suite du parcours Wowhead : Poussée d'adrénaline au 42, puis Taillader et trancher 5/5.</span></li>";
+  }
+
+  /* ---------- Rendu : arbre ---------- */
+  function renderTree(){
+    var r = ranksAt(L), html = "", spent = 0;
+    T.forEach(function(t){ if (t.tree !== "assa") spent += r[t.id]; });
+    if (PATH[L] && !TBY[PATH[L]].tree) spent -= 1;
+    for (var tier = 1; tier <= 7; tier++){
+      var req = (tier - 1) * 5;
+      html += "<div class=\"tier-lab\">R" + tier + "<br>" + req + " pts</div>";
+      LAYOUT[tier].forEach(function(id){
+        if (!id){ html += "<div class=\"node empty\" aria-hidden=\"true\"></div>"; return; }
+        var t = TBY[id], rk = r[id], cls = "node";
+        if (rk > 0) cls += " has";
+        if (rk >= t.max) cls += " full";
+        if (PATH[L] === id) cls += " new";
+        if (spent < req && rk === 0) cls += " locked";
+        if (selTalent === id) cls += " sel";
+        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
+      });
+    }
+    (function(){
+      var t = TBY.rema, rk = r.rema, cls = "node" + (rk > 0 ? " has" : "") + (rk >= t.max ? " full" : "") + (PATH[L] === "rema" ? " new" : "") + (selTalent === "rema" ? " sel" : "");
+      html += "<div class=\"tier-lab\">Assa.<br>R1</div><button type=\"button\" class=\"" + cls + "\" data-t=\"rema\" aria-label=\"" + esc(t.fr + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button><div class=\"node empty\"></div><div class=\"node empty\"></div><div class=\"node empty\"></div>";
+    })();
+    $("tree").innerHTML = html;
+    $("treeNote").textContent = "Point du niveau " + L + " en jaune";
+    renderTDetail();
+  }
+  function renderTDetail(){
+    var id = selTalent || PATH[L];
+    var t = TBY[id]; if (!t) return;
+    var lv = levelsFor(id), r = ranksAt(L)[id];
+    var when = lv.length ? "Le parcours le prend au" + (lv.length > 1 ? "x niveaux " + lv[0] + " à " + lv[lv.length - 1] : " niveau " + lv[0]) + "." : "Hors parcours jusqu'au 40.";
+    $("tdetail").innerHTML = "<p>" + tname(t) + " <span class=\"mono small\">" + r + "/" + t.max + " au niveau " + L + "</span></p><p class=\"small\">" + esc(t.eff) + "</p><p class=\"small\">" + when + (t.note ? " " + esc(t.note) : "") + "</p>";
+  }
+
+  /* ---------- Rendu : objets ---------- */
+  function stateOf(it){ return it.lv <= L ? "ok" : (it.lv <= L + 4 ? "soon" : "far"); }
+  function renderItems(){
+    var BASE = ITEMS.filter(function(i){ return !(hideH && i.terr); });
+    var hidden = ITEMS.length - BASE.length;
+    $("hideH").setAttribute("aria-pressed", hideH ? "true" : "false");
+    var melee = BASE.filter(function(i){ return i.cat === "melee" && i.dps && !i.caster; });
+    function sp(i){ return i.spd ? parseFloat(String(i.spd).replace(",", ".")) : 0; }
+    function ap(i){ return /puissance d'attaque/.test((i.eff || []).join(" ")) ? 1 : 0; }
+    var pool = melee.filter(function(i){ return i.lv <= L; }).sort(function(a,b){ return (b.dps - a.dps) || (ap(b) - ap(a)); });
+    var hns = L >= 36, mh = null, oh = null;
+    var mhc = hns ? pool.filter(function(i){ return i.kind === "sword" || i.kind === "axe"; }) : pool.filter(function(i){ return sp(i) >= 2.2; });
+    var pref = mhc[0] || null, top = pool[0] || null;
+    mh = (pref && top && pref.dps >= top.dps * 0.9) ? pref : top;
+    var prefUsed = !!(mh && pref && mh === pref);
+    oh = pool.filter(function(i){ return i !== mh && !/^Main droite/.test(i.slot); })[0] || null;
+    var have = mh ? [mh] : [];
+    var soon = BASE.filter(function(i){ return i.cat !== "armor" && !i.caster && i.lv > L && i.lv <= L + 6; }).sort(function(a,b){ return a.lv - b.lv || (b.dps || 0) - (a.dps || 0); });
+    var b = "";
+    if (have.length){
+      var h = have[0];
+      var why = prefUsed ? (hns ? "Taillader et trancher : une épée ou une hache en main droite permet à Attaque pernicieuse de déclencher l'attaque supplémentaire." : "Arme lente en main droite : Attaque pernicieuse frappe plus fort.") : (pref ? "Ton " + (hns ? "épée ou ta hache" : "arme lente") + " (" + esc(pref.fr || pref.en) + ") a plus de 10 % de DPS en moins : prends la plus forte." : "Pas encore d'" + (hns ? "épée ni de hache" : "arme lente") + " accessible : prends la plus forte.");
+      b += '<div class="bestbox go"><span class="tag">Main droite conseillée</span><div class="bhead">' + icon(h) + '<div style="min-width:0">' + qname(h) + '<p class="small">' + esc(h.slot) + ' · ' + esc(h.spd) + ' · ' + fmt(h.dps) + ' DPS</p></div></div><p class="small" style="margin-top:6px">' + h.src + '</p><p class="small" style="margin-top:4px">' + why + '</p>' + (oh ? '<p class="small" style="margin-top:6px"><b>Main gauche :</b> ' + nm(oh.fr, oh.en, oh.st) + ' (' + esc(oh.spd) + ', ' + fmt(oh.dps) + ' DPS)</p>' : '') + '</div>';
+    }
+    if (soon.length){
+      var s0 = soon[0];
+      b += '<div class="bestbox soon"><span class="tag">Prochaine cible · niveau ' + s0.lv + '</span><div class="bhead">' + icon(s0) + '<div style="min-width:0">' + qname(s0) + '<p class="small">' + esc(s0.slot) + (s0.dps ? ' · ' + fmt(s0.dps) + ' DPS' : '') + '</p></div></div><p class="small" style="margin-top:6px">' + s0.src + '</p></div>';
+    } else {
+      b += '<div class="bestbox"><span class="tag">Prochaine cible</span><p class="small">Au-delà, vise les quêtes du Monastère écarlate et des Souilles de Tranchebauge.</p></div>';
+    }
+    if (!b) b = '<div class="bestbox"><span class="tag">Arme</span><p class="small">Aucune arme accessible dans la liste à ce niveau.</p></div>';
+    $("best").innerHTML = b;
+
+    var rows = BASE.filter(function(i){
+        if (filter === "all") return true;
+        if (filter === "sword") return i.kind === "sword";
+        return i.cat === filter;
+      })
+      .slice().sort(function(a,b){ return a.lv - b.lv; })
+      .map(function(i){
+        var st = stateOf(i), lab = st === "ok" ? "Équipable" : (st === "soon" ? "Bientôt" : "Plus tard");
+        return '<li class="' + st + '"><details><summary>' + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p></div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + lab + '</span></div></summary>' + tooltip(i) + '</details></li>';
+      });
+    $("wbody").innerHTML = (rows.join("") || '<li style="padding:12px" class="small">Aucun objet dans ce filtre.</li>') + (hidden ? '<li style="padding:10px 12px" class="small">' + hidden + ' objets masqués : donjons et quêtes en territoire Horde (Pins argentés, Les Tarides, Tirisfal). Désactive le filtre pour les voir.</li>' : '');
+  }
+
+  /* ---------- Rendu : parcours et donjons ---------- */
+  function renderRoute(){
+    var span = MAX - MIN;
+    $("route").innerHTML = ROUTE.map(function(s){
+      var cls = "stop" + (L >= s.a && L <= s.b ? " cur" : (L > s.b ? " past" : ""));
+      var left = ((s.a - MIN) / span * 100), w = ((s.b - s.a) / span * 100);
+      var mark = ((L - MIN) / span * 100);
+      return "<div class=\"" + cls + "\"><span class=\"range\">" + s.a + "–" + s.b + "</span><div style=\"min-width:0\"><p>" + s.zone + "</p><p class=\"hub\">Point de chute : " + s.hub + "</p><div class=\"bar\" aria-hidden=\"true\"><i style=\"left:" + left + "%;width:" + Math.max(w, 2) + "%\"></i><b style=\"left:calc(" + mark + "% - 1px)\"></b></div><p class=\"small\">" + s.txt + "</p></div></div>";
+    }).join("");
+    var inN = 0;
+    $("djList").innerHTML = DJ.map(function(x){
+      var on = L >= x.a && L <= x.b && !(hideH && x.terr); if (on) inN++;
+      var out = L > x.b + 2 || L < x.a - 4 || (hideH && x.terr);
+      if (hideH && x.terr) on = false;
+      return "<li class=\"" + (on ? "in" : (out ? "out" : "")) + "\"><span>" + nm(x.fr, x.en, x.st) + " <span class=\"small\">· " + esc(x.where) + "</span>" + (x.terr ? "<span class=\"warnchip\">territoire Horde</span>" : "") + "</span><span class=\"lv\">" + x.a + "–" + x.b + "</span></li>";
+    }).join("");
+    $("djNote").textContent = inN ? inN + " à ton niveau" : "aucun pile à ton niveau";
+  }
+
+  /* ---------- Salle des Thanes ---------- */
+  var TQ = [
+    {id:"q1", n:nm("Précieux héritages","Important Heirlooms",1), meta:"Thom Filch, devant l'instance · niv. 15 · les deux factions", obj:"Ramasser 8 " + nm("Héritage nain","Dwarven Heirloom",1) + ".", rew:"Récompense : " + nm("Tome nain","Dwarven Tome",1) + " ou des gants en tissu, rien de fort pour toi."},
+    {id:"q2", n:nm("Une rancune ancestrale","An Ancient Grudge",1), meta:"Domestique fantomatique (Ghostly Attendant), dans le donjon · niv. 15", obj:"Tuer Faldrim, le premier boss.", rew:"Prends " + nm("Chausses creuses-tombes","Deepgrave Trousers",1) + ", jambes en cuir."},
+    {id:"q3", n:nm("Les morts sans repos","The Restless Dead",1), meta:"Afadra Mur-de-Dun (Afadra Dunwall), Forgefer, sur le chemin du donjon · niv. 15 · Alliance", obj:"15 apparitions enragées et 10 âmes tourmentées, puis apaiser l'esprit de Faldrim.", rew:"Prends " + nm("Ceinture poussiéreuse","Dusty Belt",1) + ", taille en cuir."},
+    {id:"q4", n:nm("Incursion dans le Vieux Forgefer","Old Ironforge Incursion",1), meta:"Terre-voyant Farsen (Earthseer Farsen), Dun Morogh · niv. 16 · Alliance", obj:"Avant : ramasser " + nm("La carte souterraine","Dark Iron Map",0,"Nom FR de GameWave ; l'anglais vient de WoWClassicForever.info, qui la rattache à une autre quête.") + " sur un Espion Sombrefer à l'est de Dun Morogh (vers 78, 61), puis la donner à Farsen. Dans le donjon : rapporter la tête de Durgen.", rew:"Prends " + nm("Tromblon calibré","Calibrated Blunderbuss",1) + " pour ton emplacement à distance."},
+    {id:"q5", n:nm("Le traité d'entente","The Treaty of Understanding",1), meta:"Tablette de pierre, dernière zone, près du levier de sortie · niv. 16 · Alliance", obj:"Rapporter le traité au roi Magni à Forgefer.", rew:"Pas d'objet, environ 2 550 XP."}
+  ];
+  var TB = [
+    {fr:"Faldrim Courbenclume", en:"Faldrim Anvilmar", tip:"Mort-vivant. Gros affaiblissement sur le tank : videz les monstres autour avant."},
+    {fr:"Infurnus", en:"Magmatus", st:0, note:"Infurnus dans le client selon La Taverne Forever et WoWClassicForever.info ; ForeverChanges écrit Magmatus.", tip:"Élémentaire. Il invoque un serviteur : tue-le en premier."},
+    {fr:"Pillage", en:"Plunder", tip:"Élémentaire. Son repoussement peut t'envoyer dans d'autres monstres : dos à un mur."},
+    {fr:"Durgen Mornemartel", en:"Durgen Dirgehammer", tip:"Boss final, humanoïde, peur. Une seule source cite une hache à une main : Durgen's Crescent Axe."}
+  ];
+  function renderThanes(){
+    $("tquests").innerHTML = TQ.map(function(q){
+      var on = !!doneQ[q.id];
+      return "<li class=\"" + (on ? "done" : "") + "\"><label><input type=\"checkbox\" id=\"tq-" + q.id + "\" data-q=\"" + q.id + "\"" + (on ? " checked" : "") + "><span><span>" + q.n + "</span><p class=\"meta\">" + q.meta + "</p><p class=\"reward\">" + q.obj + "</p><p class=\"reward\">" + q.rew + "</p></span></label></li>";
+    }).join("");
+    $("tbosses").innerHTML = TB.map(function(b, i){
+      return "<li><span class=\"ord\">Boss " + (i + 1) + "</span>" + nm(b.fr, b.en, b.st === 0 ? 0 : 1, b.note) + "<p class=\"small\" style=\"margin-top:3px\">" + esc(b.tip) + "</p></li>";
+    }).join("");
+  }
+
+  function render(){ renderNow(); renderTree(); renderItems(); renderRoute(); }
+
+  /* ---------- Événements ---------- */
+  $("minus").addEventListener("click", function(){ setLevel(L - 1); });
+  $("plus").addEventListener("click", function(){ setLevel(L + 1); });
+  $("lvlr").addEventListener("input", function(e){ setLevel(parseInt(e.target.value, 10)); });
+  document.addEventListener("keydown", function(e){
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (e.key === "ArrowRight" || e.key === "+"){ setLevel(L + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "-"){ setLevel(L - 1); }
+  });
+  $("tree").addEventListener("click", function(e){
+    var n = e.target.closest ? e.target.closest(".node") : null;
+    if (!n || !n.getAttribute("data-t")) return;
+    var id = n.getAttribute("data-t");
+    selTalent = (selTalent === id) ? null : id;
+    renderTree();
+  });
+  $("hideH").addEventListener("click", function(){
+    hideH = !hideH;
+    try { localStorage.setItem("voleur-horde", hideH ? "1" : "0"); } catch(e){}
+    render();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".chip[data-f]"), function(c){
+    c.addEventListener("click", function(){
+      filter = c.getAttribute("data-f");
+      Array.prototype.forEach.call(document.querySelectorAll(".chip[data-f]"), function(o){ o.setAttribute("aria-pressed", o === c ? "true" : "false"); });
+      renderItems();
+    });
+  });
+  $("tquests").addEventListener("change", function(e){
+    var q = e.target && e.target.getAttribute && e.target.getAttribute("data-q");
+    if (!q) return;
+    doneQ[q] = !!e.target.checked;
+    try { localStorage.setItem("voleur-thanes", JSON.stringify(doneQ)); } catch(err){}
+    var li = e.target.closest("li"); if (li) li.classList.toggle("done", !!e.target.checked);
+  });
+
+  $("thanes").open = L <= 18;
+  renderThanes();
+  render();
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
+</body>
+</html>

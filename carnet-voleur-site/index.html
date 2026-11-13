@@ -380,6 +380,10 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .pcarac dd{margin:0; font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; color:var(--ink)}
 .pcarac dd.fort{color:var(--rogue); font-weight:700}
 
+.dimq{color:var(--dim)}
+.elite{color:var(--warn)}
+.neuf{color:var(--ok)}
+
 /* Conseils : une liste de constats, chacun avec son niveau d'urgence. */
 .cons{list-style:none; margin:0; padding:0}
 .cons li{padding:10px 0 10px 13px; border-left:2px solid var(--line-strong); border-bottom:1px solid var(--line)}
@@ -766,15 +770,29 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   ];
 
   /* ---------- Parcours ---------- */
+  /* Quêtes qui rapportent le plus, par zone : nom FR, niveau de la quête, niveau requis,
+     expérience, élite (1 = à faire en groupe), nouveauté Forever (1 = n'existe pas en Classic).
+     Relevé sur les listes de quêtes de Wowhead Forever, trié par expérience décroissante. */
+  var QUETES = {
+    loch:[["Ingrédients de forge",30,15,2450,0,1],["Une sombre menace se dessine",20,16,1950,0,0],["Mercenaires",19,15,1800,1,0],["ON RECHERCHE : Chok'sul",22,17,1750,1,0],["À la défense des terres du roi",17,10,1600,0,0],["L'argent des vagues",20,13,1550,0,1],["La vengeance de Vyrin",20,15,1550,1,0],["Outils d'excavation",18,13,1350,0,1]],
+    ouest:[["… et cette note que vous avez trouvée",22,14,1750,0,0],["La Confrérie défias",18,14,1700,0,0],["La milice du peuple",17,9,1600,0,0],["Menace sur la côte",20,15,1550,0,0],["La côte n'est pas sûre",19,10,1450,0,0],["Pauvre Vieille Blanchy !",14,9,1250,0,0],["Le trésor caché du capitaine Sanders",16,10,1150,0,0],["Le gardien de la flamme",16,10,1150,0,0]],
+    carmines:[["Morganth",27,20,2750,1,0],["Avis de recherche : Gath'Ilzogg",26,15,2650,1,0],["ON RECHERCHE : lieutenant Fangore",26,15,2650,0,0],["Porté disparu",25,19,2550,0,0],["Tharil'zun",25,18,2550,1,0],["AVIS DE RECHERCHE : incinérateur Gar'im",25,16,2550,1,1],["Magie des Ténèbres",23,18,2300,1,0],["Les collines aux hurlements",25,15,2000,0,0]],
+    paluns:[["Une tâche sinistre",34,26,3350,1,0],["Entrevoir notre avenir",32,24,3200,1,1],["Comprendre notre présent",31,23,3150,1,1],["Carnage",30,22,3050,1,1],["Mort aux Gueules-de-Dragon",30,22,3050,1,1],["Le tord-boyaux de MacKreel",30,28,3050,0,0],["La vengeance d'Ormer",29,22,2950,0,0],["Rompre le cycle",34,24,2700,1,1]],
+    orneval:[["Les pages perdues",30,23,3650,0,0],["Les druides fous",32,24,3200,0,0],["Baron Aquanis",30,21,3050,0,0],["Le nettoyage selon Raene",30,18,3050,0,0],["Réponses aux questions",30,25,3050,0,0],["La chasse achevée",30,20,3050,0,0],["Le lac Tombeciel",30,20,3050,0,0],["De l'approvisionnement pour Auberdine",24,19,2900,0,0]],
+    penombre:[["La légende de Stalvan",35,22,4100,0,0],["Morbent Fel",32,20,3850,1,0],["La fiancée de l'Embaumeur",30,20,3650,1,0],["Worgens dans les bois",31,23,3150,0,0],["Mor'Ladim",35,28,2750,1,0],["Le Totem d'affliction",25,18,2550,0,0],["Arc de Merrick",30,18,2450,0,1],["Les Veilleurs",30,18,2450,0,0]],
+    hautebrande:[["Seigneur Aliden Perenolde",42,29,4300,0,0],["Le cadeau de Taretha",40,29,3900,0,0],["La Couronne de Volonté",43,34,3600,0,0],["L'entretien des connaissances",38,20,3550,1,0],["L'invasion de la prison",33,30,3300,0,0],["La vengeance d'Helcular",33,29,3300,0,0],["Nouvelle affectation",32,25,3200,0,0],["ON RECHERCHE : baron Vardus",40,35,3150,0,0]],
+    arathies:[["L'invocation de la Princesse",50,30,7100,1,0],["La mort venue d'en-bas",44,35,4650,0,0],["Trol'kalar",42,32,4300,1,0],["Le trésor englouti",40,35,3900,0,0],["La réelle menace",40,30,3900,1,0],["ON RECHERCHE : Otto et Lépervier",40,30,3900,1,0],["On recherche : Marez Capuche",39,30,3750,1,0],["La demande de Malin",39,30,3750,1,0]]
+  };
+
   var ROUTE = [
-    {a:17, b:18, zone:nm("Forgefer et Loch Modan","Ironforge, Loch Modan",1), hub:"Thelsamar", txt:"Salle des Thanes en groupe, quêtes de Dun Morogh et de Forgefer pour le donjon, fin du Loch Modan. " + nm(null,"Twisting the Knife",-1) + " donne " + nm("Dague-croc de Daguecroc","Daggerfang's Daggerfang",1) + " et " + nm(null,"A Dark Threat Looms",-1) + " donne " + nm("Aiguillon","Thornblade",1) + "."},
-    {a:18, b:21, zone:nm("Hurlevent et Marche de l'Ouest","Stormwind, Westfall",1), hub:"Tram depuis Forgefer", txt:nm("Mortemines","The Deadmines",1) + " pour la " + nm("Lame de cruauté","Cruel Barb",1) + ". Au 20, chaîne des poisons (Hurlevent puis Marche de l'Ouest). Apprends Épées chez Woo Ping."},
-    {a:20, b:23, zone:nm("Les Carmines","Redridge Mountains",1), hub:nm("Comté-du-Lac","Lakeshire",0), txt:"Hub court et dense, idéal entre deux passages à Hurlevent."},
-    {a:22, b:26, zone:nm("Les Paluns","Wetlands",1), hub:nm("Port de Menethil","Menethil Harbor",0), txt:"Plus de 50 quêtes dont des nouvelles en Forever. Garde la chaîne de Thandol (Thandol Span) pour le 28. Bateau vers Auberdine pour rentrer en Kalimdor."},
-    {a:23, b:28, zone:nm("Orneval","Ashenvale",1), hub:"Astranaar", txt:"Grosse zone elfe, nouvelles quêtes Forever. " + nm("Profondeurs de Brassenoire","Blackfathom Deeps",1) + " juste à côté. " + nm("Sombrivage","Darkshore",1) + " en appoint si tu manques de quêtes."},
-    {a:24, b:29, zone:nm("Bois de la Pénombre","Duskwood",1), hub:nm("Sombre-Comté","Darkshire",0), txt:"La zone la plus riche (environ 85 quêtes). Enchaîne avec " + nm("Excavations : les Paluns","Excavation Site: Wetlands",1) + " et " + nm("La Prison","The Stockade",1) + "."},
-    {a:28, b:33, zone:nm("Contreforts de Hautebrande et Alterac","Hillsbrad Foothills, Alterac Mountains",0), hub:nm("Austrivage","Southshore",0), txt:nm("Cité de Dalaran","City of Dalaran",1) + " (nouveau donjon), suite de Ravenholdt, puis " + nm("Hautes-terres Arathies","Arathi Highlands",1) + " et " + nm("Vallée de Strangleronce","Stranglethorn Vale",1) + " vers 30."},
-    {a:33, b:40, zone:nm("Hautes-terres Arathies","Arathi Highlands",1), txt:"Zone contestée. Plage de la base Forever : 30 à 40."},
+    {a:17, b:18, qz:"loch", zone:nm("Forgefer et Loch Modan","Ironforge, Loch Modan",1), hub:"Thelsamar", txt:"Salle des Thanes en groupe, quêtes de Dun Morogh et de Forgefer pour le donjon, fin du Loch Modan. " + nm(null,"Twisting the Knife",-1) + " donne " + nm("Dague-croc de Daguecroc","Daggerfang's Daggerfang",1) + " et " + nm(null,"A Dark Threat Looms",-1) + " donne " + nm("Aiguillon","Thornblade",1) + "."},
+    {a:18, b:21, qz:"ouest", zone:nm("Hurlevent et Marche de l'Ouest","Stormwind, Westfall",1), hub:"Tram depuis Forgefer", txt:nm("Mortemines","The Deadmines",1) + " pour la " + nm("Lame de cruauté","Cruel Barb",1) + ". Au 20, chaîne des poisons (Hurlevent puis Marche de l'Ouest). Apprends Épées chez Woo Ping."},
+    {a:20, b:23, qz:"carmines", zone:nm("Les Carmines","Redridge Mountains",1), hub:nm("Comté-du-Lac","Lakeshire",0), txt:"Hub court et dense, idéal entre deux passages à Hurlevent."},
+    {a:22, b:26, qz:"paluns", zone:nm("Les Paluns","Wetlands",1), hub:nm("Port de Menethil","Menethil Harbor",0), txt:"Plus de 50 quêtes dont des nouvelles en Forever. Garde la chaîne de Thandol (Thandol Span) pour le 28. Bateau vers Auberdine pour rentrer en Kalimdor."},
+    {a:23, b:28, qz:"orneval", zone:nm("Orneval","Ashenvale",1), hub:"Astranaar", txt:"Grosse zone elfe, nouvelles quêtes Forever. " + nm("Profondeurs de Brassenoire","Blackfathom Deeps",1) + " juste à côté. " + nm("Sombrivage","Darkshore",1) + " en appoint si tu manques de quêtes."},
+    {a:24, b:29, qz:"penombre", zone:nm("Bois de la Pénombre","Duskwood",1), hub:nm("Sombre-Comté","Darkshire",0), txt:"La zone la plus riche (environ 85 quêtes). Enchaîne avec " + nm("Excavations : les Paluns","Excavation Site: Wetlands",1) + " et " + nm("La Prison","The Stockade",1) + "."},
+    {a:28, b:33, qz:"hautebrande", zone:nm("Contreforts de Hautebrande et Alterac","Hillsbrad Foothills, Alterac Mountains",0), hub:nm("Austrivage","Southshore",0), txt:nm("Cité de Dalaran","City of Dalaran",1) + " (nouveau donjon), suite de Ravenholdt, puis " + nm("Hautes-terres Arathies","Arathi Highlands",1) + " et " + nm("Vallée de Strangleronce","Stranglethorn Vale",1) + " vers 30."},
+    {a:33, b:40, qz:"arathies", zone:nm("Hautes-terres Arathies","Arathi Highlands",1), txt:"Zone contestée. Plage de la base Forever : 30 à 40."},
     {a:35, b:45, zone:nm("Vallée de Strangleronce","Stranglethorn Vale",1), txt:"Zone contestée, très longue : la base Forever la donne de 30 à 50. Camp de base alliance au nord."},
     {a:36, b:44, zone:nm("Rives Claires","Riverglades",1), txt:"Zone entièrement nouvelle en Forever, 36 à 44. À voir en priorité, elle n'existe pas en Classic."},
     {a:38, b:45, zone:nm("Terres ingrates","Badlands",1), txt:"Zone contestée, 36 à 45. " + nm("Uldaman","Uldaman",1) + " est sur place."},
@@ -1181,6 +1199,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   /* Où je suis : ce que le carnet sait d'une zone. */
   var zoneTouchee = false;
   function renderZone(){
+    var ref = (persoLu && persoLu.niveau) || L;
     var sel = $("zoneSel");
     if (!sel.options.length){
       sel.innerHTML = ROUTE.map(function(z, i){
@@ -1189,7 +1208,6 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       }).join("");
     }
     if (!zoneTouchee){
-      var ref = (persoLu && persoLu.niveau) || L;
       var dedans = ROUTE.findIndex(function(z){ return ref >= z.a && ref <= z.b; });
       if (dedans >= 0) sel.value = String(dedans);
     }
@@ -1201,6 +1219,11 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     $("zoneInfo").innerHTML = '<p class="small" style="margin:0 0 10px">' + z.txt + '</p>'
       + '<ul class="cons">'
       + '<li><span class="ct">Donjons dans la tranche</span><p>' + (dj.length ? dj.map(function(x){ return nm(x.fr, x.en, x.st) + ' <span class="mono small">' + x.a + "–" + x.b + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
+      + (QUETES[z.qz] ? '<li><span class="ct">Quêtes qui rapportent le plus</span><p>' + QUETES[z.qz].map(function(q){
+            var trop = q[2] > ref;
+            return '<span class="mono small">' + q[3] + ' XP</span> ' + (trop ? '<span class="dimq">' : "<b>") + esc(q[0]) + (trop ? "</span>" : "</b>")
+              + ' <span class="small">· niv. ' + q[1] + ", dès " + q[2] + (q[4] ? ' · <span class="elite">élite, en groupe</span>' : "") + (q[5] ? ' · <span class="neuf">nouveau en Forever</span>' : "") + "</span>";
+          }).join("<br>") + '</p></li>' : "")
       + '<li><span class="ct">Objets du carnet à ce niveau</span><p>' + (obj.length ? obj.map(function(i){ return '<span class="mono small">' + i.lv + "</span> " + nm(i.fr, i.en, i.st) + ' <span class="small">· ' + (i.from === "drop" ? esc((i.mob && (i.mob[0] || i.mob[1])) || "") + (i.drop ? ", " + nbr(i.drop) + " %" : "") : "quête") + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
       + '</ul>';
   }

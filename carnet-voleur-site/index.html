@@ -380,6 +380,13 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .pcarac dd{margin:0; font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; color:var(--ink)}
 .pcarac dd.fort{color:var(--rogue); font-weight:700}
 
+/* Le conseil sur les deux mains. */
+#persoMains{margin:0 0 12px; padding:9px 12px; border-left:2px solid var(--line-strong); font-size:.9rem; color:var(--muted)}
+#persoMains:empty{display:none}
+#persoMains.inverse{border-left-color:var(--warn); color:var(--ink)}
+#persoMains.bon{border-left-color:var(--ok)}
+#persoMains b{color:var(--ink)}
+
 /* Une ligne par emplacement, le porté à gauche, la cible à droite. */
 .ptete{display:flex; flex-wrap:wrap; gap:4px 16px; align-items:baseline; margin-bottom:14px}
 .ptete .pn{font-family:var(--f-display); font-size:1.4rem; color:var(--rogue)}
@@ -539,7 +546,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         <div class="card-head"><h2>Mon perso</h2><span class="note" id="persoNote">lecture de l'armurerie</span></div>
         <div class="pgrid">
           <div id="persoTete"></div>
-          <ul class="slots" id="persoStuff"></ul>
+          <div><p id="persoMains"></p><ul class="slots" id="persoStuff"></ul></div>
         </div>
         <p class="small" id="persoErr" style="margin-top:10px"></p>
       </section>
@@ -975,6 +982,31 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       + '<dl class="pcarac">' + CARACS.filter(function(x){ return c[x[0]] !== undefined; }).map(function(x){
           return '<dt>' + esc(x[1]) + '</dt><dd class="' + (x[2] ? "fort" : "") + '">' + nbr(c[x[0]]) + (x[3] || "") + '</dd>';
         }).join("") + '</dl></div></div>';
+    /* Quelle arme dans quelle main : la lente en main droite pour Attaque pernicieuse,
+       et une épée ou une hache en main droite une fois Taillader et trancher pris. */
+    (function(){
+      var md = (p.stuff || {}).weapon, mg = (p.stuff || {}).offhand;
+      var e = $("persoMains");
+      e.className = "";
+      if (!md || !mg || !md.arme || !mg.arme){ e.innerHTML = ""; return; }
+      var a = md.arme, b = mg.arme;
+      var trancheur = function(t){ return t === "Epée" || t === "Épée" || t === "Hache"; };
+      var hns = lv >= 36;
+      var raison = null;
+      if (hns && trancheur(b.type) && !trancheur(a.type)){
+        raison = "Taillader et trancher ne déclenche son attaque supplémentaire que depuis la main droite, et seule " + esc(mg.nom) + " est une " + esc((b.type || "").toLowerCase()) + ".";
+      } else if (b.vitesse > a.vitesse){
+        raison = "Attaque pernicieuse ajoute des dégâts fixes à un coup d'arme : elle rend plus sur la lente. " + esc(mg.nom) + " frappe en " + nbr(b.vitesse) + " s contre " + nbr(a.vitesse) + " s.";
+      }
+      if (raison){
+        e.className = "inverse";
+        e.innerHTML = "<b>Inverse tes armes.</b> " + esc(mg.nom) + " devrait être en main droite et " + esc(md.nom) + " en main gauche. " + raison;
+      } else {
+        e.className = "bon";
+        e.innerHTML = "<b>Tes armes sont dans le bon sens.</b> " + esc(md.nom) + " en main droite (" + nbr(a.vitesse) + " s, " + nbr(a.dps) + " DPS) et " + esc(mg.nom) + " en main gauche (" + nbr(b.vitesse) + " s, " + nbr(b.dps) + " DPS) : la plus lente frappe bien à droite.";
+      }
+    })();
+
     var dejaPropose = {};
     $("persoStuff").innerHTML = SLOTS.map(function(sl){
       var porte = (p.stuff || {})[sl[0]];

@@ -55,6 +55,32 @@ function icone(v){
   return null;
 }
 
+/* Pour les armes, on va chercher vitesse, DPS et type sur l'infobulle Wowhead :
+   l'armurerie ne les donne pas, et c'est ce qui décide quelle main prend quoi. */
+const armesCache = new Map();
+async function arme(id){
+  if (!id) return null;
+  const dans = armesCache.get(id);
+  if (dans && Date.now() - dans.t < 24 * 3600 * 1000) return dans.v;
+  try {
+    const r = await fetch("https://nether.wowhead.com/forever/tooltip/item/" + id + "?locale=2");
+    if (!r.ok) return null;
+    const j = await r.json();
+    const t = String(j.tooltip || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    const m = t.match(/Dégâts\s*:\s*([0-9]+)\s*-\s*([0-9]+)[\s\S]*?Vitesse\s*([0-9.,]+)[\s\S]*?\(([0-9.,]+) dégâts par seconde\)/);
+    if (!m) return null;
+    const ty = (t.match(/\b(Dague|Epée|Épée|Hache|Masse|Arme de pugilat|Arme d'hast|Bâton)\b/) || [])[1] || null;
+    const v = {
+      min: Number(m[1]), max: Number(m[2]),
+      vitesse: Number(String(m[3]).replace(",", ".")),
+      dps: Number(String(m[4]).replace(",", ".")),
+      type: ty
+    };
+    armesCache.set(id, { t: Date.now(), v: v });
+    return v;
+  } catch(e){ return null; }
+}
+
 function resume(d){
   const c = (d && d.character) || d || {};
   const g = c.gear || {};
@@ -123,6 +149,9 @@ const serveur = http.createServer(async function(req, res){
       return res.end(JSON.stringify({ erreur: "personnage introuvable ou page changée" }));
     }
     const v = resume(d);
+    for (const sl of ["weapon", "offhand", "ranged"]){
+      if (v.stuff[sl] && v.stuff[sl].id) v.stuff[sl].arme = await arme(v.stuff[sl].id);
+    }
     cache.set(slug, { t: Date.now(), v: v });
     res.writeHead(200, {"Content-Type":"application/json; charset=utf-8", "Cache-Control":"public, max-age=60"});
     res.end(JSON.stringify(v));

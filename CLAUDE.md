@@ -12,6 +12,10 @@ Application web (une page, installable) de leveling pour un voleur elfe de la nu
   - `CLASSQ` : quêtes de classe, `ROUTE` : parcours de zones, `DJ` : donjons
   - `ITEMS` : armes et équipement, avec stats et nom d'icône Wowhead (`icon`). Provenance structurée : `from` vaut `drop` ou `quete` ; `mob`, `lieu`, `quest` sont des triplets `[fr, en, st]` passés à `nm()` ; `zone` est une chaîne ; `drop` est le pourcentage et `dropSt` vaut 1 si le taux est lu sur Wowhead Forever, 0 s'il reste à confirmer. `srcHtml()` et `srcLine()` les mettent en forme, ne plus écrire de champ `src` en texte libre
   - `TQ`, `TB` : quêtes et boss de la Salle des Thanes
+  - `TREES`, `LAYOUT`, `LAYOUT_A`, `LAYOUT_F` : les trois arbres affichés côte à côte, chaque talent porte son icône officielle dans `ic`
+- L'interface est en onglets (`.tab` + `data-p`) : Niveau, Talents, Armes, Mon perso, Parcours, et Salle des Thanes qui disparaît après le niveau 20.
+- Cases à cocher : `DONE` dans `localStorage` sous `voleur-fait`, clés `i:<id>` pour un objet, `s:<niveau>:<sort EN>`, `p:<niveau>:<poison EN>`.
+- Onglet Mon perso : `chargerPerso()` appelle le relais, `renderPerso()` affiche portrait, caractéristiques, pièces portées et l'objet conseillé par emplacement, avec sa provenance dépliable. La règle des deux mains (la lente à droite, épée ou hache à droite après le niveau 36) est dans le bloc `persoMains`.
 - `api/` : relais Node vers l'armurerie Blizzard, déployé à part sur Render (voir `api/README.md`). La constante `API` de `index.html` pointe dessus.
 - `carnet-voleur-site/sw.js` : service worker (mode hors ligne).
 - `carnet-voleur-site/manifest.webmanifest` et `icons/` : installation en application.

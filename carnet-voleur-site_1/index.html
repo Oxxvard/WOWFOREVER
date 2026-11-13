@@ -405,12 +405,21 @@ footer{margin-top:22px}
     {id:"hns",  tier:5, fr:"Taillader et trancher", en:"Hack and Slash", max:5, eff:"Bonus selon l'arme : attaque supplémentaire (épée, hache), critique (dague, poing), armure ignorée (masse)."},
     {id:"fos",  tier:6, fr:null, en:"Flash of Steel", max:5, eff:"Surin (Shank) rend plus d'énergie et son temps de recharge baisse.", note:"Pas encore traduit dans le client selon ForeverChanges. Kami Labs l'appelle « Éclair d'acier »."},
     {id:"ar",   tier:7, fr:"Poussée d'adrénaline", en:"Adrenaline Rush", max:1, eff:"+100 % de régénération d'énergie pendant 15 s."},
+    {id:"mali", tier:1, tree:"assa", fr:"Malice", en:"Malice", max:5, eff:"Au rang 5 : +5 % de chances de coup critique, attaques et poisons."},
+    {id:"neme", tier:2, tree:"assa", fr:"Némésis", en:"Ruthlessness", max:3, eff:"Au rang 3 : 60 % de chances qu'un coup de grâce rende un point de combo.", note:"Forever appelle Ruthlessness « Némésis »."},
+    {id:"vigu", tier:3, tree:"assa", fr:"Vigueur", en:"Vigor", max:2, eff:"Au rang 2 : +10 points d'énergie maximum."},
+    {id:"mort", tier:3, tree:"assa", fr:"Mortalité", en:"Lethality", max:2, eff:"Au rang 2 : +6 % de dégâts sur les critiques d'Attaque pernicieuse, Suriner, Attaque sournoise, Estropier, Frappe fantomatique et Hémorragie."},
     {id:"rema", tier:1, tree:"assa", fr:"Attaques impitoyables", en:"Remorseless Attacks", max:2, eff:"Après avoir tué un ennemi, +40 % de chances de critique sur ta prochaine technique génératrice de points de combo pendant 20 s (valeur du guide Wowhead ; ForeverChanges indique 20 %).", note:"Talent de l'arbre Assassinat, palier 1."}
   ];
   var TBY = {}; T.forEach(function(t){ TBY[t.id] = t; });
   /* Placement dans la grille (colonne 1 à 4) */
-  var LAYOUT = {1:["coup","effi","refl",null], 2:["punc","defl","prec","ispr"], 3:["endu","ripo","comp",null], 4:["ikic","flaw","wexp","aggr"], 5:["dws","bf","hns",null], 6:[null,"fos",null,null], 7:[null,"ar",null,null]};
-  var PATH = {10:"effi",11:"effi",12:"rema",13:"rema",14:"coup",15:"coup",16:"coup",17:"prec",18:"prec",19:"defl",20:"defl",21:"defl",22:"ripo",23:"comp",24:"comp",25:"prec",26:"endu",27:"wexp",28:"wexp",29:"aggr",30:"aggr",31:"aggr",32:"bf",33:"dws",34:"dws",35:"flaw",36:"hns",37:"fos",38:"fos",39:"fos",40:"fos"};
+  var LAYOUT = {1:["coup","effi","refl",null], 2:["punc","defl","prec","ispr"], 3:["endu","ripo",null,"comp"], 4:["ikic","flaw","wexp","aggr"], 5:["dws","bf","hns",null], 6:[null,null,"fos",null], 7:[null,"ar",null,null]};
+  /* Arbre Assassinat : seules les rangées où le parcours place des points */
+  var LAYOUT_A = {1:[null,"rema","mali",null], 2:["neme",null,null,null], 3:["vigu",null,"mort",null]};
+  var PATH = {10:"effi",11:"effi",12:"rema",13:"rema",14:"coup",15:"coup",16:"coup",17:"prec",18:"prec",19:"defl",20:"defl",21:"defl",22:"ripo",23:"comp",24:"comp",25:"prec",26:"endu",27:"wexp",28:"wexp",29:"aggr",30:"aggr",31:"aggr",32:"bf",33:"dws",34:"dws",35:"flaw",36:"hns",37:"fos",38:"fos",39:"fos",40:"fos",
+    41:"fos",42:"ar",43:"hns",44:"hns",45:"hns",46:"hns",47:"endu",
+    48:"mali",49:"mali",50:"mali",51:"mali",52:"mali",53:"neme",54:"neme",55:"neme",
+    56:"mort",57:"mort",58:"vigu",59:"vigu",60:"ikic"};
 
   function ranksAt(L){
     var r = {}; T.forEach(function(t){ r[t.id] = 0; });
@@ -418,7 +427,7 @@ footer{margin-top:22px}
     return r;
   }
   function levelsFor(id){
-    var out = []; for (var lv = 10; lv <= 40; lv++){ if (PATH[lv] === id) out.push(lv); }
+    var out = []; for (var lv = 10; lv <= MAX; lv++){ if (PATH[lv] === id) out.push(lv); }
     return out;
   }
   function tname(t){ return t.fr ? nm(t.fr, t.en, 1, t.note) : nm(null, t.en, -1, t.note); }
@@ -669,7 +678,7 @@ footer{margin-top:22px}
     if (t){
       items.push(["Talent", "Place ton point dans <span class=\"talent-pill\">" + (t.fr ? esc(t.fr) : esc(t.en)) + " <span class=\"en\">(" + esc(t.en) + ")</span></span> <span class=\"mono small\">" + r[tid] + "/" + t.max + "</span>" + (t.fr ? "" : " <span class=\"nofr\">nom FR non traduit en jeu</span>")]);
     }
-    if (L > 40) items.push(["Après le 40", "Les sorts du maître voleur vont jusqu'au 60. Les poisons, le parcours de talents, les zones, les donjons et les armes s'arrêtent encore au 40 : cette partie du carnet reste à écrire."]);
+    if (L > 40) items.push(["Après le 40", "Les sorts et le parcours de talents vont jusqu'au 60. Wowhead n'a pas de guide de leveling Combat pour Forever : le parcours du 41 au 60 est déduit des arbres Forever, pas recopié d'un guide. Les poisons, les zones, les donjons et les armes s'arrêtent encore au 40 : cette partie du carnet reste à écrire."]);
     if (SPELLS[L]) items.push(["Maître voleur", spellsHtml(SPELLS[L])]);
     else items.push(["Maître voleur", "<span class=\"small\">Rien à apprendre : les sorts et rangs tombent aux niveaux pairs.</span>"]);
     if (L === 17) items.push(["Rappel", "Vérifie que tu as appris au 16 : " + spellsHtml(SPELLS[16])]);
@@ -716,10 +725,23 @@ footer{margin-top:22px}
         html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
       });
     }
-    (function(){
-      var t = TBY.rema, rk = r.rema, cls = "node" + (rk > 0 ? " has" : "") + (rk >= t.max ? " full" : "") + (PATH[L] === "rema" ? " new" : "") + (selTalent === "rema" ? " sel" : "");
-      html += "<div class=\"tier-lab\">Assa.<br>R1</div><button type=\"button\" class=\"" + cls + "\" data-t=\"rema\" aria-label=\"" + esc(t.fr + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button><div class=\"node empty\"></div><div class=\"node empty\"></div><div class=\"node empty\"></div>";
-    })();
+    var spentA = 0;
+    T.forEach(function(t){ if (t.tree === "assa") spentA += r[t.id]; });
+    if (PATH[L] && TBY[PATH[L]].tree === "assa") spentA -= 1;
+    for (var ta = 1; ta <= 3; ta++){
+      var reqA = (ta - 1) * 5;
+      html += "<div class=\"tier-lab\">Assa.<br>" + reqA + " pts</div>";
+      LAYOUT_A[ta].forEach(function(id){
+        if (!id){ html += "<div class=\"node empty\" aria-hidden=\"true\"></div>"; return; }
+        var t = TBY[id], rk = r[id], cls = "node";
+        if (rk > 0) cls += " has";
+        if (rk >= t.max) cls += " full";
+        if (PATH[L] === id) cls += " new";
+        if (spentA < reqA && rk === 0) cls += " locked";
+        if (selTalent === id) cls += " sel";
+        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
+      });
+    }
     $("tree").innerHTML = html;
     $("treeNote").textContent = "Point du niveau " + L + " en jaune";
     renderTDetail();

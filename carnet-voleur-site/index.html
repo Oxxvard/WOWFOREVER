@@ -349,6 +349,13 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .more{display:block; margin-top:4px; background:none; border:0; padding:0; color:var(--muted); font-family:var(--f-body); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer}
 .more:hover{color:var(--accent)}
 
+/* Arbre de talents : la case montre l'icône du jeu. */
+.node .ti{display:block; margin:0 auto 5px; width:30px; height:30px; border-radius:5px; border:1px solid rgba(0,0,0,.6); filter:grayscale(1) brightness(.55)}
+.node.has .ti, .node.full .ti{filter:none}
+.node{text-align:center; font-size:.76rem; line-height:1.25}
+.node .nfr{display:block}
+.node .nr{display:block; margin-top:3px}
+
 /* Replis. */
 .help summary, .fold summary{font-size:.84rem; color:var(--muted)}
 .help summary:hover, .fold summary:hover{color:var(--accent)}
@@ -526,36 +533,49 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 
   /* ---------- Talents Combat ---------- */
   var T = [
-    {id:"coup", tier:1, fr:"Achèvement", en:"Coup de Grace", max:3, eff:"+7 / 13 / 20 % de dégâts d'Éviscération."},
-    {id:"effi", tier:1, fr:"Attaques optimisées", en:"Efficient Strikes", max:2, eff:"Attaque pernicieuse et Hémorragie coûtent 3 puis 5 points d'énergie de moins."},
-    {id:"refl", tier:1, fr:"Réflexes-éclairs", en:"Lightning Reflexes", max:5, eff:"+1 % d'esquive par rang."},
-    {id:"punc", tier:2, fr:"Blessures transperçantes", en:"Puncturing Wounds", max:3, eff:"Critique de l'Attaque sournoise augmenté, chance d'un point de combo en plus. Utile seulement si tu joues dagues dans le dos."},
-    {id:"defl", tier:2, fr:"Déviation", en:"Deflection", max:3, eff:"+2 % de parade par rang. Ouvre Riposte."},
-    {id:"prec", tier:2, fr:"Précision", en:"Precision", max:3, eff:"+1 % de chances de toucher par rang."},
-    {id:"ispr", tier:2, fr:"Sprint amélioré", en:"Improved Sprint", max:2, eff:"50 % de chances que Sprint retire les ralentissements et immobilisations."},
-    {id:"endu", tier:3, fr:"Endurcissement", en:"Endurance", max:2, eff:"Temps de recharge de Sprint et d'Evasion réduit de 30 %."},
-    {id:"ripo", tier:3, fr:"Riposte", en:"Riposte", max:1, eff:"Après une parade : frappe à 150 % des dégâts de l'arme et désarme la cible 6 s."},
-    {id:"comp", tier:3, fr:"Sang-froid", en:"Composure", max:2, eff:"En garde (Poised) coûte 5 puis 10 points d'énergie de moins.", note:"Nom FR de ForeverChanges. Kami Labs écrit « Maîtrise de soi »."},
-    {id:"ikic", tier:4, fr:"Coup de pied amélioré", en:"Improved Kick", max:2, eff:"50 % de chances de réduire la cible au silence 2 s."},
-    {id:"flaw", tier:4, fr:"Exécution parfaite", en:"Flawless Execution", max:1, eff:"Éviscération coûte 15 points d'énergie de moins."},
-    {id:"wexp", tier:4, fr:"Expertise en armes", en:"Weapon Expertise", max:2, eff:"−1 % de chances que tes attaques soient esquivées ou parées."},
-    {id:"aggr", tier:4, fr:"Agressivité", en:"Aggression", max:3, eff:"+5 / 10 / 15 % de dégâts d'Attaque pernicieuse et d'Éviscération."},
-    {id:"dws",  tier:5, fr:"Spécialisation Ambidextrie", en:"Dual Wield Specialization", max:2, eff:"+25 / 50 % de dégâts de l'arme en main gauche."},
-    {id:"bf",   tier:5, fr:"Déluge de lames", en:"Blade Flurry", max:1, eff:"15 s : +20 % de vitesse d'attaque et tes coups touchent une cible proche en plus."},
-    {id:"hns",  tier:5, fr:"Taillader et trancher", en:"Hack and Slash", max:5, eff:"Bonus selon l'arme : attaque supplémentaire (épée, hache), critique (dague, poing), armure ignorée (masse)."},
-    {id:"fos",  tier:6, fr:null, en:"Flash of Steel", max:5, eff:"Surin (Shank) rend plus d'énergie et son temps de recharge baisse.", note:"Pas encore traduit dans le client selon ForeverChanges. Kami Labs l'appelle « Éclair d'acier »."},
-    {id:"ar",   tier:7, fr:"Poussée d'adrénaline", en:"Adrenaline Rush", max:1, eff:"+100 % de régénération d'énergie pendant 15 s."},
-    {id:"mali", tier:1, tree:"assa", fr:"Malice", en:"Malice", max:5, eff:"Au rang 5 : +5 % de chances de coup critique, attaques et poisons."},
-    {id:"neme", tier:2, tree:"assa", fr:"Némésis", en:"Ruthlessness", max:3, eff:"Au rang 3 : 60 % de chances qu'un coup de grâce rende un point de combo.", note:"Forever appelle Ruthlessness « Némésis »."},
-    {id:"vigu", tier:3, tree:"assa", fr:"Vigueur", en:"Vigor", max:2, eff:"Au rang 2 : +10 points d'énergie maximum."},
-    {id:"mort", tier:3, tree:"assa", fr:"Mortalité", en:"Lethality", max:2, eff:"Au rang 2 : +6 % de dégâts sur les critiques d'Attaque pernicieuse, Suriner, Attaque sournoise, Estropier, Frappe fantomatique et Hémorragie."},
-    {id:"rema", tier:1, tree:"assa", fr:"Attaques impitoyables", en:"Remorseless Attacks", max:2, eff:"Après avoir tué un ennemi, +40 % de chances de critique sur ta prochaine technique génératrice de points de combo pendant 20 s (valeur du guide Wowhead ; ForeverChanges indique 20 %).", note:"Talent de l'arbre Assassinat, palier 1."}
+    {id:"coup", ic:"ability_rogue_eviscerate", tier:1, fr:"Achèvement", en:"Coup de Grace", max:3, eff:"+7 / 13 / 20 % de dégâts d'Éviscération."},
+    {id:"effi", ic:"spell_shadow_ritualofsacrifice", tier:1, fr:"Attaques optimisées", en:"Efficient Strikes", max:2, eff:"Attaque pernicieuse et Hémorragie coûtent 3 puis 5 points d'énergie de moins."},
+    {id:"refl", ic:"spell_nature_invisibilty", tier:1, fr:"Réflexes-éclairs", en:"Lightning Reflexes", max:5, eff:"+1 % d'esquive par rang."},
+    {id:"punc", ic:"ability_backstab", tier:2, fr:"Blessures transperçantes", en:"Puncturing Wounds", max:3, eff:"Critique de l'Attaque sournoise augmenté, chance d'un point de combo en plus. Utile seulement si tu joues dagues dans le dos."},
+    {id:"defl", ic:"ability_parry", tier:2, fr:"Déviation", en:"Deflection", max:3, eff:"+2 % de parade par rang. Ouvre Riposte."},
+    {id:"prec", ic:"ability_marksmanship", tier:2, fr:"Précision", en:"Precision", max:3, eff:"+1 % de chances de toucher par rang."},
+    {id:"ispr", ic:"ability_rogue_sprint", tier:2, fr:"Sprint amélioré", en:"Improved Sprint", max:2, eff:"50 % de chances que Sprint retire les ralentissements et immobilisations."},
+    {id:"endu", ic:"spell_shadow_shadowward", tier:3, fr:"Endurcissement", en:"Endurance", max:2, eff:"Temps de recharge de Sprint et d'Evasion réduit de 30 %."},
+    {id:"ripo", ic:"ability_warrior_challange", tier:3, fr:"Riposte", en:"Riposte", max:1, eff:"Après une parade : frappe à 150 % des dégâts de l'arme et désarme la cible 6 s."},
+    {id:"comp", ic:"ability_rogue_fleetfooted", tier:3, fr:"Sang-froid", en:"Composure", max:2, eff:"En garde (Poised) coûte 5 puis 10 points d'énergie de moins.", note:"Nom FR de ForeverChanges. Kami Labs écrit « Maîtrise de soi »."},
+    {id:"ikic", ic:"ability_kick", tier:4, fr:"Coup de pied amélioré", en:"Improved Kick", max:2, eff:"50 % de chances de réduire la cible au silence 2 s."},
+    {id:"flaw", ic:"inv_sword_35", tier:4, fr:"Exécution parfaite", en:"Flawless Execution", max:1, eff:"Éviscération coûte 15 points d'énergie de moins."},
+    {id:"wexp", ic:"spell_holy_blessingofstrength", tier:4, fr:"Expertise en armes", en:"Weapon Expertise", max:2, eff:"−1 % de chances que tes attaques soient esquivées ou parées."},
+    {id:"aggr", ic:"ability_racial_avatar", tier:4, fr:"Agressivité", en:"Aggression", max:3, eff:"+5 / 10 / 15 % de dégâts d'Attaque pernicieuse et d'Éviscération."},
+    {id:"dws", ic:"ability_dualwield",  tier:5, fr:"Spécialisation Ambidextrie", en:"Dual Wield Specialization", max:2, eff:"+25 / 50 % de dégâts de l'arme en main gauche."},
+    {id:"bf", ic:"ability_warrior_punishingblow",   tier:5, fr:"Déluge de lames", en:"Blade Flurry", max:1, eff:"15 s : +20 % de vitesse d'attaque et tes coups touchent une cible proche en plus."},
+    {id:"hns", ic:"inv_sword_27",  tier:5, fr:"Taillader et trancher", en:"Hack and Slash", max:5, eff:"Bonus selon l'arme : attaque supplémentaire (épée, hache), critique (dague, poing), armure ignorée (masse)."},
+    {id:"fos", ic:"ability_rogue_restlessblades",  tier:6, fr:null, en:"Flash of Steel", max:5, eff:"Surin (Shank) rend plus d'énergie et son temps de recharge baisse.", note:"Pas encore traduit dans le client selon ForeverChanges. Kami Labs l'appelle « Éclair d'acier »."},
+    {id:"ar", ic:"spell_shadow_shadowworddominate",   tier:7, fr:"Poussée d'adrénaline", en:"Adrenaline Rush", max:1, eff:"+100 % de régénération d'énergie pendant 15 s."},
+    {id:"sgou", ic:"ability_gouge", tier:1, tree:"assa", fr:"Suriner amélioré", en:"Improved Gouge", max:3, eff:"Augmente la durée de Suriner de 2 s au rang 3."},
+    {id:"iexp", ic:"ability_warrior_riposte", tier:2, tree:"assa", fr:"Exposer l'armure amélioré", en:"Improved Expose Armor", max:2, eff:"Exposer l'armure coûte 10 points d'énergie de moins et en rend 2 avec 5 points de combo."},
+    {id:"isad", ic:"ability_rogue_slicedice", tier:2, tree:"assa", fr:"Débiter amélioré", en:"Improved Slice and Dice", max:3, eff:"Augmente la durée de Débiter de 15 % au rang 3."},
+    {id:"bspl", ic:"ability_rogue_rupture", tier:3, tree:"assa", fr:null, en:"Blood Splatter", max:1, eff:"Augmente la durée de Rupture de 4 s et celle de Garrot de 6 s.", note:"Pas encore traduit dans le client."},
+    {id:"vilp", ic:"ability_rogue_feigndeath", tier:4, tree:"assa", fr:"Poisons abominables", en:"Vile Poisons", max:5, eff:"+20 % de dégâts de tes poisons au rang 5."},
+    {id:"cbld", ic:"spell_ice_lament", tier:4, tree:"assa", fr:"Sang froid", en:"Cold Blood", max:1, eff:"À l'activation : +100 % de chances de coup critique sur ta prochaine attaque.", note:"À ne pas confondre avec Sang-froid de l'arbre Combat (Composure)."},
+    {id:"ipoi", ic:"ability_poisons", tier:4, tree:"assa", fr:"Poisons améliorés", en:"Improved Poisons", max:5, eff:"+10 % de chances d'appliquer tes poisons, et 50 % de chances de ne pas consommer de charge."},
+    {id:"rstr", ic:"ability_warrior_decisivestrike", tier:5, tree:"assa", fr:"Frappes implacables", en:"Relentless Strikes", max:5, eff:"Tes coups de grâce ont une chance par point de combo de rendre 25 points d'énergie."},
+    {id:"veno", ic:"inv_sword_31", tier:5, tree:"assa", fr:"Toxine", en:"Venom", max:1, eff:"Surin augmente de 30 % les dégâts de tes poisons et tes chances de les appliquer."},
+    {id:"ikid", ic:"ability_rogue_kidneyshot", tier:5, tree:"assa", fr:"Aiguillon perfide amélioré", en:"Improved Kidney Shot", max:2, eff:"+10 % de dégâts contre une cible étourdie par Aiguillon perfide."},
+    {id:"sfat", ic:"spell_shadow_chilltouch", tier:6, tree:"assa", fr:"Scelle le destin", en:"Seal Fate", max:3, eff:"Tes critiques avec une technique qui génère des points de combo peuvent en générer un de plus."},
+    {id:"muti", ic:"ability_rogue_deadlybrew", tier:7, tree:"assa", fr:"Estropier", en:"Mutilate", max:1, eff:"Attaque instantanément des deux armes : 90 % des dégâts d'arme plus 40 par arme. Niveau 40."},
+    {id:"mali", ic:"ability_racial_bloodrage", tier:1, tree:"assa", fr:"Malice", en:"Malice", max:5, eff:"Au rang 5 : +5 % de chances de coup critique, attaques et poisons."},
+    {id:"neme", ic:"ability_druid_disembowel", tier:2, tree:"assa", fr:"Némésis", en:"Ruthlessness", max:3, eff:"Au rang 3 : 60 % de chances qu'un coup de grâce rende un point de combo.", note:"Forever appelle Ruthlessness « Némésis »."},
+    {id:"vigu", ic:"spell_nature_earthbindtotem", tier:3, tree:"assa", fr:"Vigueur", en:"Vigor", max:2, eff:"Au rang 2 : +10 points d'énergie maximum."},
+    {id:"mort", ic:"ability_criticalstrike", tier:3, tree:"assa", fr:"Mortalité", en:"Lethality", max:2, eff:"Au rang 2 : +6 % de dégâts sur les critiques d'Attaque pernicieuse, Suriner, Attaque sournoise, Estropier, Frappe fantomatique et Hémorragie."},
+    {id:"rema", ic:"ability_fiegndead", tier:1, tree:"assa", fr:"Attaques impitoyables", en:"Remorseless Attacks", max:2, eff:"Après avoir tué un ennemi, +40 % de chances de critique sur ta prochaine technique génératrice de points de combo pendant 20 s (valeur du guide Wowhead ; ForeverChanges indique 20 %).", note:"Talent de l'arbre Assassinat, palier 1."}
   ];
   var TBY = {}; T.forEach(function(t){ TBY[t.id] = t; });
   /* Placement dans la grille (colonne 1 à 4) */
   var LAYOUT = {1:["coup","effi","refl",null], 2:["punc","defl","prec","ispr"], 3:["endu","ripo",null,"comp"], 4:["ikic","flaw","wexp","aggr"], 5:["dws","bf","hns",null], 6:[null,null,"fos",null], 7:[null,"ar",null,null]};
   /* Arbre Assassinat : seules les rangées où le parcours place des points */
-  var LAYOUT_A = {1:[null,"rema","mali",null], 2:["neme",null,null,null], 3:["vigu",null,"mort",null]};
+  var LAYOUT_A = {1:["sgou","rema","mali",null], 2:["neme","iexp",null,"isad"], 3:["vigu","bspl","mort",null],
+                  4:["vilp","cbld","ipoi",null], 5:["rstr","veno","ikid",null], 6:[null,null,"sfat",null], 7:[null,"muti",null,null]};
   var PATH = {10:"effi",11:"effi",12:"rema",13:"rema",14:"coup",15:"coup",16:"coup",17:"prec",18:"prec",19:"defl",20:"defl",21:"defl",22:"ripo",23:"comp",24:"comp",25:"prec",26:"endu",27:"wexp",28:"wexp",29:"aggr",30:"aggr",31:"aggr",32:"bf",33:"dws",34:"dws",35:"flaw",36:"hns",37:"fos",38:"fos",39:"fos",40:"fos",
     41:"fos",42:"ar",43:"hns",44:"hns",45:"hns",46:"hns",47:"endu",
     48:"mali",49:"mali",50:"mali",51:"mali",52:"mali",53:"neme",54:"neme",55:"neme",
@@ -900,6 +920,10 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   }
 
   /* ---------- Rendu : arbre ---------- */
+  function tIcon(t){
+    if (!t.ic) return "";
+    return '<img class="ti" src="https://wow.zamimg.com/images/wow/icons/medium/' + t.ic + '.jpg" alt="" loading="lazy" width="30" height="30">';
+  }
   function renderTree(){
     var r = ranksAt(L), html = "", spent = 0;
     T.forEach(function(t){ if (t.tree !== "assa") spent += r[t.id]; });
@@ -915,13 +939,13 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         if (PATH[L] === id) cls += " new";
         if (spent < req && rk === 0) cls += " locked";
         if (selTalent === id) cls += " sel";
-        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
+        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
       });
     }
     var spentA = 0;
     T.forEach(function(t){ if (t.tree === "assa") spentA += r[t.id]; });
     if (PATH[L] && TBY[PATH[L]].tree === "assa") spentA -= 1;
-    for (var ta = 1; ta <= 3; ta++){
+    for (var ta = 1; ta <= 7; ta++){
       var reqA = (ta - 1) * 5;
       html += "<div class=\"tier-lab\">Assa.<br>" + reqA + " pts</div>";
       LAYOUT_A[ta].forEach(function(id){
@@ -932,7 +956,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         if (PATH[L] === id) cls += " new";
         if (spentA < reqA && rk === 0) cls += " locked";
         if (selTalent === id) cls += " sel";
-        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\"><span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
+        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
       });
     }
     $("tree").innerHTML = html;

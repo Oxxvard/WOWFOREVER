@@ -23,21 +23,21 @@ body{margin:0}
 
 /* Layout : barre de niveau collante en haut, puis colonne principale (actions du niveau, arbre, armes) et colonne latérale (parcours, donjons). Une colonne sur téléphone. */
 :root{
-  --bg:#0d0b08; --panel:#15110c; --panel2:#1e1812; --ink:#e7dcc6; --muted:#8e8372; --line:#342a1d;
-  --rogue:#f5d272; --rogue-ink:#f5d272; --violet:#c9a85f; --violet-soft:#2a2115;
-  --ok:#8ec07c; --warn:#e0a44d; --dim:#5c5244; --q2:#5fd44a; --q3:#5aa8ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark;
+  --bg:#15120d; --panel:#1d1912; --panel2:#262017; --ink:#f0eade; --muted:#ab9f8c; --line:#2f2819;
+  --rogue:#e2b45c; --rogue-ink:#e2b45c; --violet:#c9a85f; --violet-soft:#2a2115;
+  --ok:#8fc97d; --warn:#e8b45f; --dim:#8d8170; --q2:#6fe055; --q3:#6cb4ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark;
   --f-display:"Alegreya SC", Georgia, "Times New Roman", serif;
   --f-body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#0d0b08; --panel:#15110c; --panel2:#1e1812; --ink:#e7dcc6; --muted:#8e8372; --line:#342a1d;
-  --rogue:#f5d272; --rogue-ink:#f5d272; --violet:#c9a85f; --violet-soft:#2a2115;
-  --ok:#8ec07c; --warn:#e0a44d; --dim:#5c5244; --q2:#5fd44a; --q3:#5aa8ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; } }
+  --bg:#15120d; --panel:#1d1912; --panel2:#262017; --ink:#f0eade; --muted:#ab9f8c; --line:#2f2819;
+  --rogue:#e2b45c; --rogue-ink:#e2b45c; --violet:#c9a85f; --violet-soft:#2a2115;
+  --ok:#8fc97d; --warn:#e8b45f; --dim:#8d8170; --q2:#6fe055; --q3:#6cb4ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; } }
 :root[data-theme="dark"]{
-  --bg:#0d0b08; --panel:#15110c; --panel2:#1e1812; --ink:#e7dcc6; --muted:#8e8372; --line:#342a1d;
-  --rogue:#f5d272; --rogue-ink:#f5d272; --violet:#c9a85f; --violet-soft:#2a2115;
-  --ok:#8ec07c; --warn:#e0a44d; --dim:#5c5244; --q2:#5fd44a; --q3:#5aa8ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; }
+  --bg:#15120d; --panel:#1d1912; --panel2:#262017; --ink:#f0eade; --muted:#ab9f8c; --line:#2f2819;
+  --rogue:#e2b45c; --rogue-ink:#e2b45c; --violet:#c9a85f; --violet-soft:#2a2115;
+  --ok:#8fc97d; --warn:#e8b45f; --dim:#8d8170; --q2:#6fe055; --q3:#6cb4ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; }
 
 *{box-sizing:border-box}
 body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.5;
@@ -266,91 +266,83 @@ footer{margin-top:22px}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
 .node, .chip, .stop{transition:background-color .15s, border-color .15s, box-shadow .2s}
 
-/* ---------- Passe de design : moins de cadres, un seul accent, un rythme ---------- */
-:root{
-  --accent:#e3b765;        /* l'or, réservé : onglet actif, niveau courant, repères « maintenant » */
-  --line:#241d15;          /* filets presque invisibles */
-  --line-strong:#3a2f21;   /* quand il faut vraiment séparer */
-  --ink:#ddd4c4; --muted:#7d7366; --dim:#4b443a;
-  --sp:16px;
-}
-body{font-size:15px; line-height:1.52}
-.wrap{max-width:980px; padding-inline:18px}
 
-/* Les cartes ne sont plus des boîtes : de l'espace et un titre, c'est tout. */
-section.card{background:none; border:0; border-radius:0; padding:0; margin-bottom:28px}
-.card-head{align-items:baseline; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--line)}
-h1{font-size:1.45rem; letter-spacing:.02em}
-h2{font-size:1.05rem; letter-spacing:.04em; text-transform:none; color:var(--ink)}
-.card-head .note{font-size:.78rem; color:var(--dim)}
+/* ---------- Mise en forme ---------- */
+:root{ --accent:var(--rogue); --line-strong:#473d2d; }
+body{font-size:16px; line-height:1.55}
+.wrap{max-width:1020px; padding-inline:20px}
 
-/* La barre de niveau est l'ancre de la page : un grand chiffre, pas de cadre. */
-.levelbar{padding-block:14px 12px; border-bottom:1px solid var(--line)}
-.lvl button{width:34px; height:34px; font-size:1.1rem; background:none; border-color:var(--line-strong); color:var(--muted)}
+/* Pas de boîtes imbriquées : un titre, un filet, de l'espace. */
+section.card{background:none; border:0; border-radius:0; padding:0; margin-bottom:30px}
+.card-head{align-items:baseline; margin-bottom:16px; padding-bottom:9px; border-bottom:1px solid var(--line-strong)}
+h1{font-size:1.5rem}
+h2{font-size:1.1rem; color:var(--ink)}
+.card-head .note{font-size:.82rem; color:var(--muted)}
+
+/* Barre de niveau : le grand chiffre porte la page. */
+.levelbar{padding-block:14px 12px; border-bottom:1px solid var(--line-strong)}
+.lvl button{width:36px; height:36px; font-size:1.2rem; background:none; border-color:var(--line-strong); color:var(--muted)}
 .lvl button:hover:not(:disabled){border-color:var(--accent); color:var(--accent)}
-.lvlnum .k{font-size:.64rem; letter-spacing:.18em; color:var(--dim)}
+.lvlnum .k{font-size:.68rem; letter-spacing:.16em; color:var(--muted)}
 .lvlnum .v{font-size:2.5rem; color:var(--accent)}
-.pts{font-size:.8rem; color:var(--muted)}
+.pts{font-size:.85rem; color:var(--muted)}
 
-/* Onglets : l'accent ne sert qu'à dire où on est. */
-.tabs{gap:0; padding-top:4px; border-bottom:1px solid var(--line-strong); margin-bottom:22px}
-.tab{padding:8px 15px; font-size:.9rem; border:0; border-bottom:2px solid transparent; border-radius:0; background:none}
+/* Onglets : l'accent dit où tu es, rien d'autre. */
+.tabs{gap:0; padding-top:4px; border-bottom:1px solid var(--line-strong); margin-bottom:24px}
+.tab{padding:9px 16px; font-size:.95rem; color:var(--muted); border:0; border-bottom:2px solid transparent; border-radius:0; background:none}
+.tab:hover{color:var(--ink)}
 .tab[aria-selected="true"]{background:none; border-bottom-color:var(--accent); color:var(--accent)}
 
-/* Lignes du panneau de niveau : étiquette minuscule, contenu lisible. */
-.now-list{gap:14px}
-.now-list li{grid-template-columns:104px minmax(0,1fr); gap:12px}
-.tag{font-size:.64rem; letter-spacing:.14em; color:var(--dim)}
+/* Panneau du niveau. */
+.now-list{gap:15px}
+.now-list li{grid-template-columns:112px minmax(0,1fr); gap:14px}
+.tag{font-size:.68rem; letter-spacing:.13em; color:var(--muted)}
 
-/* Encadrés d'arme : un filet à gauche au lieu d'une boîte. */
-.bestbox{background:none; border:0; border-left:2px solid var(--line-strong); border-radius:0; padding:2px 0 2px 12px}
+/* Armes conseillées : un filet vertical, pas une boîte. */
+.bestbox{background:none; border:0; border-left:2px solid var(--line-strong); border-radius:0; padding:2px 0 2px 13px}
 .bestbox.go{border-left-color:var(--accent)}
-.bestbox.soon{border-left-color:var(--line-strong)}
 .bestbox.go .tag{color:var(--accent)}
-.bestbox.soon .tag{color:var(--dim)}
+.bestbox.soon .tag{color:var(--muted)}
 
-/* Liste d'objets : un seul filet par ligne, pas de survol coloré. */
+/* Liste d'objets. */
 .ilist > li{border-bottom:1px solid var(--line)}
-.ilist > li.ok{box-shadow:inset 2px 0 0 var(--line-strong)}
-.ilist > li.soon{box-shadow:inset 2px 0 0 var(--line)}
-.ilist > li.far{opacity:.42}
-.ilist details > summary:hover{background:rgba(255,255,255,.02)}
+.ilist > li.ok{box-shadow:inset 2px 0 0 var(--ok)}
+.ilist > li.soon{box-shadow:inset 2px 0 0 var(--line-strong)}
+.ilist > li.far{opacity:.55}
+.ilist details > summary:hover{background:var(--panel)}
 .imeta, .isrc{color:var(--muted)}
-.isrc b{color:var(--muted); font-weight:600}
+.isrc b{color:var(--ok); font-weight:700}
 .isrc b.tbc{color:var(--warn)}
-.state{font-size:.64rem; letter-spacing:.1em; color:var(--dim)}
-.state.ok{color:var(--muted)} .state.soon{color:var(--dim)} .state.far{color:var(--dim)}
-.idps{font-size:.95rem}
-.idps small{font-size:.62rem; letter-spacing:.08em; color:var(--dim)}
+.state{font-size:.68rem; letter-spacing:.09em; color:var(--muted)}
+.state.ok{color:var(--ok)} .state.soon{color:var(--warn)} .state.far{color:var(--dim)}
+.idps small{font-size:.66rem; letter-spacing:.07em; color:var(--muted)}
 
-/* Chips : discrets tant qu'ils ne sont pas actifs. */
-.chip{border-color:var(--line-strong); background:none; color:var(--muted); font-size:.82rem; padding:3px 10px}
-.chip:hover{color:var(--ink)}
-.chip[aria-pressed="true"]{background:rgba(227,183,101,.1); color:var(--accent); border-color:var(--accent); font-weight:600}
+/* Pastilles de filtre. */
+.chip{border-color:var(--line-strong); background:none; color:var(--muted); font-size:.85rem; padding:4px 11px}
+.chip:hover{color:var(--ink); border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:rgba(226,180,92,.12); color:var(--accent); border-color:var(--accent); font-weight:600}
 
-/* En-têtes de groupe et colonne des lieux. */
-.ghead{background:none; border-top:0; border-bottom:1px solid var(--line-strong); padding:14px 2px 6px}
-.ghead .gn{font-size:.95rem}
-.ghead .gm{font-size:.74rem; color:var(--dim)}
-.lieux{background:none; border-color:var(--line)}
-.lieux button{font-size:.85rem; color:var(--muted)}
-.lieux li.sel button{background:rgba(227,183,101,.07); color:var(--accent)}
-.lieux .n{color:var(--dim)}
+/* Groupes et colonne des lieux. */
+.ghead{background:none; border-top:0; border-bottom:1px solid var(--line-strong); padding:16px 2px 7px}
+.ghead .gn{font-size:1rem}
+.ghead .gm{font-size:.78rem; color:var(--muted)}
+.lieux{background:none; border-color:var(--line-strong)}
+.lieux button{font-size:.88rem; color:var(--muted)}
+.lieux button:hover{background:var(--panel); color:var(--ink)}
+.lieux li.sel button{background:rgba(226,180,92,.1); color:var(--accent)}
+.lieux .n{color:var(--muted)}
 
-/* Arbre de talents : moins de contraste sur les cases vides. */
-.node{font-size:.78rem}
-
-/* Les pavés de quête sont coupés à deux lignes tant qu'on ne les déplie pas. */
+/* Pavés de quête coupés à deux lignes. */
 .clampable .body{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .clampable.open .body{display:block}
-.more{display:block; margin-top:3px; background:none; border:0; padding:0; color:var(--dim); font-family:var(--f-body); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer}
+.more{display:block; margin-top:4px; background:none; border:0; padding:0; color:var(--muted); font-family:var(--f-body); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer}
 .more:hover{color:var(--accent)}
 
-/* Replis et aide : presque invisibles tant qu'on ne les ouvre pas. */
-.help summary, .fold summary{font-size:.8rem; color:var(--dim)}
-.help summary:hover, .fold summary:hover{color:var(--muted)}
-.sources{margin-top:24px}
-
+/* Replis. */
+.help summary, .fold summary{font-size:.84rem; color:var(--muted)}
+.help summary:hover, .fold summary:hover{color:var(--accent)}
+.sources{margin-top:26px}
+.small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -405,7 +397,7 @@ h2{font-size:1.05rem; letter-spacing:.04em; text-transform:none; color:var(--ink
     <button class="tab" type="button" role="tab" data-p="tree" aria-selected="false">Talents</button>
     <button class="tab" type="button" role="tab" data-p="items" aria-selected="false">Armes <span class="cnt"></span></button>
     <button class="tab" type="button" role="tab" data-p="route" aria-selected="false">Parcours</button>
-    <button class="tab" type="button" role="tab" data-p="thanes" aria-selected="false">Salle des Thanes</button>
+    <button class="tab" type="button" role="tab" data-p="thanes" aria-selected="false" id="tabThanes">Salle des Thanes</button>
   </nav>
 
   <div class="grid">
@@ -847,6 +839,12 @@ h2{font-size:1.05rem; letter-spacing:.04em; text-transform:none; color:var(--ink
   /* ---------- Rendu : au niveau ---------- */
   function renderNow(){
     $("lvlv").textContent = L;
+    var tTh = $("tabThanes");
+    if (tTh){
+      var inTh = L <= 20;
+      tTh.hidden = !inTh;
+      if (!inTh && tTh.getAttribute("aria-selected") === "true" && showTab) showTab("now");
+    }
     $("lvlr").value = L;
     $("minus").disabled = L <= MIN;
     $("plus").disabled = L >= MAX;
@@ -1102,6 +1100,7 @@ h2{font-size:1.05rem; letter-spacing:.04em; text-transform:none; color:var(--ink
     try { localStorage.setItem("voleur-horde", hideH ? "1" : "0"); } catch(e){}
     render();
   });
+  var showTab = null;
   (function(){
     var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
     function show(p){
@@ -1111,6 +1110,7 @@ h2{font-size:1.05rem; letter-spacing:.04em; text-transform:none; color:var(--ink
       });
       try { localStorage.setItem("voleur-onglet", p); } catch(e){}
     }
+    showTab = show;
     tabs.forEach(function(t){ t.addEventListener("click", function(){ show(t.getAttribute("data-p")); }); });
     var start = "now";
     try { var v = localStorage.getItem("voleur-onglet"); if (v && document.querySelector('.tab[data-p="' + v + '"]')) start = v; } catch(e){}

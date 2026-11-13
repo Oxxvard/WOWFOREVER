@@ -476,7 +476,15 @@ footer{margin-top:22px}
     34:[["Poudre aveuglante","Blinding Powder",0]],
     36:[["Poison instantané III","Instant Poison III",1]],
     38:[["Poison mortel II","Deadly Poison II",1],["Poison de distraction mentale II","Mind-numbing Poison II",0]],
-    40:[["Poison douloureux II","Wound Poison II",0]]
+    40:[["Poison douloureux II","Wound Poison II",0]],
+    44:[["Poison instantané IV","Instant Poison IV",1]],
+    46:[["Poison mortel III","Deadly Poison III",1]],
+    48:[["Poison douloureux III","Wound Poison III",1]],
+    50:[["Poison affaiblissant II","Crippling Poison II",1]],
+    52:[["Poison instantané V","Instant Poison V",1],["Poison de distraction mentale III","Mind-numbing Poison III",1]],
+    54:[["Poison mortel IV","Deadly Poison IV",1]],
+    56:[["Poison douloureux IV","Wound Poison IV",1]],
+    60:[["Poison instantané VI","Instant Poison VI",1],["Poison mortel V","Deadly Poison V",1]]
   };
   function listNames(arr){
     return arr.map(function(a){ return nm(a[0], a[1], a[2], a[3] && a[2] !== 1 ? a[3] : null) + (a[2] === 1 && a[3] ? ' <span class="small">(' + esc(a[3]) + ')</span>' : ""); }).join(", ");
@@ -678,7 +686,7 @@ footer{margin-top:22px}
     if (t){
       items.push(["Talent", "Place ton point dans <span class=\"talent-pill\">" + (t.fr ? esc(t.fr) : esc(t.en)) + " <span class=\"en\">(" + esc(t.en) + ")</span></span> <span class=\"mono small\">" + r[tid] + "/" + t.max + "</span>" + (t.fr ? "" : " <span class=\"nofr\">nom FR non traduit en jeu</span>")]);
     }
-    if (L > 40) items.push(["Après le 40", "Les sorts et le parcours de talents vont jusqu'au 60. Wowhead n'a pas de guide de leveling Combat pour Forever : le parcours du 41 au 60 est déduit des arbres Forever, pas recopié d'un guide. Les poisons, les zones, les donjons et les armes s'arrêtent encore au 40 : cette partie du carnet reste à écrire."]);
+    if (L > 40) items.push(["Après le 40", "Les sorts, les poisons et le parcours de talents vont jusqu'au 60. Wowhead n'a pas de guide de leveling Combat pour Forever : le parcours du 41 au 60 est déduit des arbres Forever, pas recopié d'un guide. Les zones, les donjons et les armes s'arrêtent encore au 40 : cette partie du carnet reste à écrire."]);
     if (SPELLS[L]) items.push(["Maître voleur", spellsHtml(SPELLS[L])]);
     else items.push(["Maître voleur", "<span class=\"small\">Rien à apprendre : les sorts et rangs tombent aux niveaux pairs.</span>"]);
     if (L === 17) items.push(["Rappel", "Vérifie que tu as appris au 16 : " + spellsHtml(SPELLS[16])]);

@@ -381,6 +381,16 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .pcarac dd.fort{color:var(--rogue); font-weight:700}
 
 .dimq{color:var(--dim)}
+.qlist{list-style:none; margin:4px 0 0; padding:0}
+.qlist > li{display:grid; grid-template-columns:20px minmax(0,1fr); gap:7px; align-items:start; padding:5px 0; border-bottom:1px solid var(--line)}
+.qlist summary{cursor:pointer; list-style:none}
+.qlist summary::-webkit-details-marker{display:none}
+.qlist summary:hover b{color:var(--accent)}
+.rang{display:inline-block; min-width:16px; font-family:var(--f-mono); color:var(--accent)}
+.qmap{margin:7px 0 4px}
+.mini{position:relative; max-width:330px; border:1px solid var(--line-strong); border-radius:6px; overflow:hidden}
+.mini img{display:block; width:100%; height:auto}
+.mini .pt{position:absolute; width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%; background:var(--accent); border:2px solid #15120d; box-shadow:0 0 0 2px rgba(232,187,102,.45)}
 .elite{color:var(--warn)}
 .neuf{color:var(--ok)}
 
@@ -773,6 +783,21 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   /* Quêtes qui rapportent le plus, par zone : nom FR, niveau de la quête, niveau requis,
      expérience, élite (1 = à faire en groupe), nouveauté Forever (1 = n'existe pas en Classic).
      Relevé sur les listes de quêtes de Wowhead Forever, trié par expérience décroissante. */
+  /* Qui donne la quête et où : identifiant de zone, x, y, nom du PNJ.
+     Relevé sur la carte de chaque page de quête Wowhead Forever. */
+  var QPNJ = {
+    "paluns|Une tâche sinistre":[11,45.5,16.4,"Balgaras le Crasseux"],
+    "paluns|Entrevoir notre avenir":[11,38.8,52.2,"Prospecteur Whelgar"],
+    "paluns|Comprendre notre présent":[11,34.4,52.4,"Gardien de Goaz"],
+    "paluns|Carnage":[11,54.2,24.2,"Griffe pourrie affolée"],
+    "paluns|Mort aux Gueules-de-Dragon":[11,49.4,42,"Howin Genteplume"],
+    "paluns|Le tord-boyaux de MacKreel":[45,43.2,92.6,"Foggy MacKreel"],
+    "paluns|La vengeance d'Ormer":[11,32.4,50.8,"Grondecroc"],
+    "paluns|Rompre le cycle":[11,49.4,42,"Howin Genteplume"]
+  };
+  var ZONE_NOM = {11:"Les Paluns",45:"Hautes-terres Arathies",38:"Loch Modan",40:"Marche de l'Ouest",44:"Les Carmines",331:"Orneval",10:"Bois de la Pénombre",267:"Contreforts de Hautebrande"};
+  function carteUrl(z){ return "https://wow.zamimg.com/images/wow/classicplus/maps/frfr/normal/" + z + ".jpg"; }
+
   var QUETES = {
     loch:[["Ingrédients de forge",30,15,2450,0,1],["Une sombre menace se dessine",20,16,1950,0,0],["Mercenaires",19,15,1800,1,0],["ON RECHERCHE : Chok'sul",22,17,1750,1,0],["À la défense des terres du roi",17,10,1600,0,0],["L'argent des vagues",20,13,1550,0,1],["La vengeance de Vyrin",20,15,1550,1,0],["Outils d'excavation",18,13,1350,0,1]],
     ouest:[["… et cette note que vous avez trouvée",22,14,1750,0,0],["La Confrérie défias",18,14,1700,0,0],["La milice du peuple",17,9,1600,0,0],["Menace sur la côte",20,15,1550,0,0],["La côte n'est pas sûre",19,10,1450,0,0],["Pauvre Vieille Blanchy !",14,9,1250,0,0],["Le trésor caché du capitaine Sanders",16,10,1150,0,0],["Le gardien de la flamme",16,10,1150,0,0]],
@@ -1197,6 +1222,57 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   }
 
   /* Où je suis : ce que le carnet sait d'une zone. */
+  /* Classement des quêtes : d'abord ce qui est faisable seul et pas trop dur,
+     ensuite ce qui demande un groupe, enfin ce qui est encore hors de portée. */
+  function difficulte(q, niv){
+    var ecart = q[1] - niv;
+    if (ecart <= 0) return [0, "facile"];
+    if (ecart <= 2) return [1, "à ton niveau"];
+    return [2, "dur en solo"];
+  }
+  function ligneQuete(zq, q, niv, rang){
+    var cle = "q:" + zq + ":" + q[0];
+    var pnj = QPNJ[zq + "|" + q[0]];
+    var d = difficulte(q, niv);
+    var tete = (rang ? '<b class="rang">' + rang + "</b> " : "")
+      + '<span class="mono small">' + q[3] + ' XP</span> <b>' + esc(q[0]) + "</b>"
+      + ' <span class="small">· niv. ' + q[1] + (q[5] ? ' · <span class="neuf">nouveau en Forever</span>' : "")
+      + (d[0] === 2 ? ' · <span class="elite">' + d[1] + "</span>" : ' · <span class="dimq">' + d[1] + "</span>") + "</span>";
+    var corps = "";
+    if (pnj){
+      corps = '<div class="qmap"><p class="small">Donnée par <b>' + esc(pnj[3]) + "</b> en <span class=\"mono\">"
+        + nbr(pnj[1]) + ", " + nbr(pnj[2]) + '</span> · ' + esc(ZONE_NOM[pnj[0]] || ("zone " + pnj[0])) + "</p>"
+        + '<div class="mini"><img src="' + carteUrl(pnj[0]) + '" alt="" loading="lazy">'
+        + '<span class="pt" style="left:' + pnj[1] + '%;top:' + pnj[2] + '%"></span></div></div>';
+    } else {
+      corps = '<p class="small">Position du donneur pas encore relevée pour cette zone.</p>';
+    }
+    return '<li>' + chk(cle) + '<details><summary>' + tete + '</summary>' + corps + "</details></li>";
+  }
+  function blocQuetes(z, niv){
+    var tout = (QUETES[z.qz] || []).filter(function(q){ return !DONE["q:" + z.qz + ":" + q[0]]; });
+    var dispo = tout.filter(function(q){ return !q[4] && q[2] <= niv; });
+    var solo = dispo.filter(function(q){ return difficulte(q, niv)[0] < 2; })
+      .sort(function(a, b){ var da = difficulte(a, niv)[0], db = difficulte(b, niv)[0]; return da - db || b[3] - a[3]; });
+    var durs = dispo.filter(function(q){ return difficulte(q, niv)[0] === 2; }).sort(function(a, b){ return b[3] - a[3]; });
+    var groupe = tout.filter(function(q){ return q[4] && q[2] <= niv; }).sort(function(a, b){ return b[3] - a[3]; });
+    var plusTard = tout.filter(function(q){ return q[2] > niv; }).sort(function(a, b){ return a[2] - b[2]; });
+    var faits = (QUETES[z.qz] || []).length - tout.length;
+    var h = "";
+    h += '<li class="bon"><span class="ct">À faire seul, par ordre de priorité</span><ul class="qlist">'
+      + (solo.length ? solo.map(function(q, i){ return ligneQuete(z.qz, q, niv, i + 1); }).join("")
+        : '<li class="small">Rien de confortable en solo ici à ton niveau. Monte d\'un ou deux niveaux, ou prends les quêtes ci-dessous en groupe.</li>')
+      + "</ul></li>";
+    if (durs.length) h += '<li class="chaud"><span class="ct">Seul mais costaud, pas en priorité</span><ul class="qlist">'
+      + durs.map(function(q){ return ligneQuete(z.qz, q, niv, 0); }).join("") + "</ul></li>";
+    if (groupe.length) h += '<li><span class="ct">En groupe seulement</span><ul class="qlist">'
+      + groupe.map(function(q){ return ligneQuete(z.qz, q, niv, 0); }).join("") + "</ul></li>";
+    if (plusTard.length) h += '<li><span class="ct">Pas encore à ton niveau</span><p class="small">'
+      + plusTard.map(function(q){ return esc(q[0]) + " <span class=\"mono\">dès " + q[2] + "</span>"; }).join(" · ") + "</p></li>";
+    if (faits) h += '<li><span class="ct">Déjà faites</span><p class="small">' + faits + " quête" + (faits > 1 ? "s" : "") + " cochée" + (faits > 1 ? "s" : "") + " dans cette zone.</p></li>";
+    return h;
+  }
+
   var zoneTouchee = false;
   function renderZone(){
     var ref = (persoLu && persoLu.niveau) || L;
@@ -1219,11 +1295,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     $("zoneInfo").innerHTML = '<p class="small" style="margin:0 0 10px">' + z.txt + '</p>'
       + '<ul class="cons">'
       + '<li><span class="ct">Donjons dans la tranche</span><p>' + (dj.length ? dj.map(function(x){ return nm(x.fr, x.en, x.st) + ' <span class="mono small">' + x.a + "–" + x.b + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
-      + (QUETES[z.qz] ? '<li><span class="ct">Quêtes qui rapportent le plus</span><p>' + QUETES[z.qz].map(function(q){
-            var trop = q[2] > ref;
-            return '<span class="mono small">' + q[3] + ' XP</span> ' + (trop ? '<span class="dimq">' : "<b>") + esc(q[0]) + (trop ? "</span>" : "</b>")
-              + ' <span class="small">· niv. ' + q[1] + ", dès " + q[2] + (q[4] ? ' · <span class="elite">élite, en groupe</span>' : "") + (q[5] ? ' · <span class="neuf">nouveau en Forever</span>' : "") + "</span>";
-          }).join("<br>") + '</p></li>' : "")
+      + (QUETES[z.qz] ? blocQuetes(z, ref) : "")
       + '<li><span class="ct">Objets du carnet à ce niveau</span><p>' + (obj.length ? obj.map(function(i){ return '<span class="mono small">' + i.lv + "</span> " + nm(i.fr, i.en, i.st) + ' <span class="small">· ' + (i.from === "drop" ? esc((i.mob && (i.mob[0] || i.mob[1])) || "") + (i.drop ? ", " + nbr(i.drop) + " %" : "") : "quête") + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
       + '</ul>';
   }

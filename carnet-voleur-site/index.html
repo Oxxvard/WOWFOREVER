@@ -369,6 +369,19 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 /* Le nom du talent survolé ou choisi s'affiche sous l'arbre, pas dans la case. */
 #tdetail{min-height:3.4em}
 
+/* Mon perso : une ligne par emplacement, le porté à gauche, la cible à droite. */
+.ptete{display:flex; flex-wrap:wrap; gap:4px 16px; align-items:baseline; margin-bottom:14px}
+.ptete .pn{font-family:var(--f-display); font-size:1.4rem; color:var(--rogue)}
+.ptete .pm{font-size:.84rem; color:var(--muted)}
+.slots{list-style:none; margin:0; padding:0}
+.slots li{display:grid; grid-template-columns:92px minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:baseline; padding:7px 2px; border-bottom:1px solid var(--line)}
+.slots .sl{font-size:.68rem; letter-spacing:.11em; text-transform:uppercase; color:var(--muted)}
+.slots .vide{color:var(--dim); font-style:italic}
+.slots .cible{font-size:.86rem; color:var(--muted)}
+.slots .cible b{color:var(--ok); font-weight:700}
+.slots li.ok-deja .cible{color:var(--ok)}
+@media (max-width:700px){ .slots li{grid-template-columns:minmax(0,1fr); gap:2px} .slots .sl{letter-spacing:.08em} }
+
 /* Replis. */
 .help summary, .fold summary{font-size:.84rem; color:var(--muted)}
 .help summary:hover, .fold summary:hover{color:var(--accent)}
@@ -427,7 +440,8 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     <button class="tab" type="button" role="tab" data-p="now" aria-selected="true">Niveau</button>
     <button class="tab" type="button" role="tab" data-p="tree" aria-selected="false">Talents</button>
     <button class="tab" type="button" role="tab" data-p="items" aria-selected="false">Armes <span class="cnt"></span></button>
-    <button class="tab" type="button" role="tab" data-p="route" aria-selected="false">Parcours</button>
+    <button class="tab" type="button" role="tab" data-p="perso" aria-selected="false">Mon perso</button>
+          <button class="tab" type="button" role="tab" data-p="route" aria-selected="false">Parcours</button>
     <button class="tab" type="button" role="tab" data-p="thanes" aria-selected="false" id="tabThanes">Salle des Thanes</button>
   </nav>
 
@@ -498,6 +512,13 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
           </div>
         </div>
       </details>
+
+      <section class="card" data-p="perso">
+        <div class="card-head"><h2>Mon perso</h2><span class="note" id="persoNote">lecture de l'armurerie</span></div>
+        <div id="persoTete"></div>
+        <ul class="slots" id="persoStuff"></ul>
+        <p class="small" id="persoErr" style="margin-top:10px"></p>
+      </section>
 
       <section class="card" data-p="route">
         <div class="card-head"><h2>Parcours</h2><span class="note">Zone en cours surlignée</span></div>
@@ -880,6 +901,82 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     return t + '</div>';
   }
 
+  /* ---------- Mon perso : lecture en direct de l'armurerie ---------- */
+  /* Le relais tourne à part : le navigateur n'a pas le droit d'appeler Blizzard depuis ce domaine. */
+  var API = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
+    ? "http://127.0.0.1:8799"
+    : "https://carnet-armurerie.onrender.com";
+  var PERSO = "oxvar-dinho";
+  var SLOTS = [
+    ["weapon", "Main droite", function(i){ return i.cat === "melee" && !i.caster; }],
+    ["offhand", "Main gauche", function(i){ return i.cat === "melee" && !i.caster; }],
+    ["ranged", "À distance", function(i){ return i.cat === "ranged"; }],
+    ["head", "Tête", null],
+    ["chest", "Torse", function(i){ return i.kind === "chest"; }],
+    ["wrist", "Poignets", null],
+    ["hand", "Mains", null],
+    ["waist", "Taille", function(i){ return i.kind === "belt"; }],
+    ["leg", "Jambes", function(i){ return i.kind === "legs"; }],
+    ["foot", "Pieds", null],
+    ["leftFinger", "Doigt", function(i){ return i.kind === "ring"; }],
+    ["rightFinger", "Doigt", function(i){ return i.kind === "ring"; }],
+    ["back", "Dos", null],
+    ["shirt", "Chemise", null]
+  ];
+  function note(i){ return i.dps || i.armor || 0; }
+  function whLien(id, txt){ return '<a href="https://www.wowhead.com/forever/fr/item=' + id + '" target="_blank" rel="noopener">' + txt + '</a>'; }
+  var persoLu = null, persoEnCours = false;
+  function renderPerso(){
+    if (!persoLu) return;
+    var p = persoLu, lv = p.niveau || L;
+    $("persoTete").innerHTML = '<div class="ptete"><span class="pn">' + esc(p.nom || "?") + '</span>'
+      + '<span class="pm">' + esc([p.race, p.classe].filter(Boolean).join(" · ")) + '</span>'
+      + '<span class="pm">niveau <b class="mono">' + lv + '</b></span>'
+      + '<span class="pm">niveau d\'objet moyen <b class="mono">' + (p.ilvl || "?") + '</b></span></div>';
+    var dejaPropose = {};
+    $("persoStuff").innerHTML = SLOTS.map(function(sl){
+      var porte = (p.stuff || {})[sl[0]];
+      if (!porte && !sl[2]) return "";
+      var gauche = porte
+        ? whLien(porte.id, esc(porte.nom || ("objet " + porte.id)))
+        : '<span class="vide">rien d\'équipé</span>';
+      var droite = "", cls = "";
+      if (sl[2]){
+        var cands = ITEMS.filter(function(i){ return sl[2](i) && i.lv <= lv && !(hideH && i.terr) && !dejaPropose[i.id]; })
+                         .sort(function(a, b){ return note(b) - note(a); });
+        var best = cands[0];
+        if (best) dejaPropose[best.id] = 1;
+        if (best){
+          if (porte && porte.id === best.id){ droite = "déjà le mieux du carnet"; cls = " ok-deja"; }
+          else {
+            var ecart = porte ? "" : "";
+            droite = "à viser : " + nm(best.fr, best.en, best.st)
+              + ' <b>' + (best.dps ? fmt(best.dps) + " DPS" : best.armor + " armure") + '</b>';
+          }
+        }
+      }
+      return '<li class="' + cls.trim() + '"><span class="sl">' + esc(sl[1]) + '</span><span>' + gauche + '</span><span class="cible">' + droite + '</span></li>';
+    }).join("");
+    $("persoNote").textContent = "lu sur l'armurerie";
+  }
+  function chargerPerso(){
+    if (persoEnCours || persoLu) return;
+    persoEnCours = true;
+    $("persoNote").textContent = "lecture en cours";
+    fetch(API + "/armurerie?perso=" + encodeURIComponent(PERSO))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        persoEnCours = false;
+        if (d && d.erreur){ $("persoErr").textContent = "L'armurerie n'a rien renvoyé : " + d.erreur; $("persoNote").textContent = "échec"; return; }
+        persoLu = d; $("persoErr").textContent = ""; renderPerso();
+      })
+      .catch(function(){
+        persoEnCours = false;
+        $("persoNote").textContent = "hors ligne";
+        $("persoErr").textContent = "Le relais ne répond pas. Il s'endort après quelques minutes sans visite : réessaie dans une minute.";
+      });
+  }
+
   /* ---------- État ---------- */
   var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true, byLieu = false, hideGot = false, DONE = {}, selLieu = null;
   try { selLieu = localStorage.getItem("voleur-lieu-sel") || null; } catch(e){}
@@ -1172,6 +1269,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         c.classList.toggle("on", c.getAttribute("data-p") === p);
       });
       try { localStorage.setItem("voleur-onglet", p); } catch(e){}
+      if (p === "perso") chargerPerso();
     }
     showTab = show;
     tabs.forEach(function(t){ t.addEventListener("click", function(){ show(t.getAttribute("data-p")); }); });

@@ -269,8 +269,8 @@ footer{margin-top:22px}
       </div>
       <div class="slider">
         <label for="lvlr" class="small" style="position:absolute;left:-9999px">Niveau</label>
-        <input type="range" id="lvlr" min="17" max="40" step="1" value="17">
-        <div class="ticks" aria-hidden="true"><span>17</span><span>20</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
+        <input type="range" id="lvlr" min="17" max="60" step="1" value="17">
+        <div class="ticks" aria-hidden="true"><span>17</span><span>25</span><span>35</span><span>45</span><span>55</span><span>60</span></div>
       </div>
       <p class="pts" id="pts"></p>
     </div>
@@ -371,7 +371,7 @@ footer{margin-top:22px}
 <script>
 (function(){
   "use strict";
-  var MIN = 17, MAX = 40;
+  var MIN = 17, MAX = 60;
 
   /* ---------- Noms ---------- */
   function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -438,7 +438,17 @@ footer{margin-top:22px}
     34:[["Cécité","Blind",1,null,"new",false],["Sprint","Sprint",1,null,"rank",true],["Embuscade","Ambush",1,null,"rank",false]],
     36:[["Attaque sournoise","Backstab",1,null,"rank",false],["Exposer l'armure","Expose Armor",1,null,"rank",false],["Rupture","Rupture",1,null,"rank",false]],
     38:[["Attaque pernicieuse","Sinister Strike",1,null,"rank",true],["Garrot","Garrote",1,null,"rank",false]],
-    40:[["Chute amortie","Safe Fall",0,null,"new",false],["Camouflage","Stealth",1,null,"rank",true],["Éviscération","Eviscerate",1,null,"rank",true],["Feinte","Feint",0,null,"rank",false]]
+    40:[["Chute amortie","Safe Fall",0,null,"new",false],["Camouflage","Stealth",1,null,"rank",true],["Éviscération","Eviscerate",1,null,"rank",true],["Feinte","Feint",0,null,"rank",false]],
+    42:[["Débiter","Slice and Dice",1,null,"rank",true],["Disparition","Vanish",1,null,"rank",true],["Coup de pied","Kick",1,null,"rank",false],["Embuscade","Ambush",1,null,"rank",false]],
+    44:[["Surin","Shank",0,"Nom FR de Kami Labs. ForeverChanges garde « Shank ». Sort propre à Forever.","rank",null],["Attaque sournoise","Backstab",1,null,"rank",false],["Rupture","Rupture",1,null,"rank",false]],
+    46:[["Attaque pernicieuse","Sinister Strike",1,null,"rank",true],["Exposer l'armure","Expose Armor",1,null,"rank",false],["Garrot","Garrote",1,null,"rank",false],["Suriner","Gouge",1,null,"rank",false]],
+    48:[["Éviscération","Eviscerate",1,null,"rank",true],["Assommer","Sap",1,null,"rank",false],["Marque de mort","Death Mark",1,"Sort propre à Forever.","rank",false]],
+    50:[["Aiguillon perfide","Kidney Shot",1,null,"rank",false],["Embuscade","Ambush",1,null,"rank",false],["Estropier","Mutilate",1,"Sort propre à Forever, demande deux dagues.","rank",false]],
+    52:[["Attaque sournoise","Backstab",1,null,"rank",false],["Feinte","Feint",1,null,"rank",false],["Rupture","Rupture",1,null,"rank",false]],
+    54:[["Attaque pernicieuse","Sinister Strike",1,null,"rank",true],["Garrot","Garrote",1,null,"rank",false]],
+    56:[["Éviscération","Eviscerate",1,null,"rank",true],["Exposer l'armure","Expose Armor",1,null,"rank",false],["Marque de mort","Death Mark",1,"Sort propre à Forever.","rank",false]],
+    58:[["Sprint","Sprint",1,null,"rank",true],["Coup de pied","Kick",1,null,"rank",false],["Embuscade","Ambush",1,null,"rank",false]],
+    60:[["Éviscération","Eviscerate",1,null,"rank",true],["Camouflage","Stealth",1,null,"rank",true],["Attaque sournoise","Backstab",1,"Deux rangs au 60.","rank",false],["Rupture","Rupture",1,null,"rank",false],["Suriner","Gouge",1,null,"rank",false],["Feinte","Feint",1,null,"rank",false],["Estropier","Mutilate",1,"Sort propre à Forever, demande deux dagues.","rank",false],["Marque de mort","Death Mark",1,"Sort propre à Forever.","rank",false]]
   };
   function spellsHtml(arr){
     function one(a){ return nm(a[0], a[1], a[2], a[2] !== 1 ? a[3] : null) + ' <span class="small">(' + (a[4] === "new" ? "nouveau" : "rang sup.") + ')</span>'; }
@@ -659,6 +669,7 @@ footer{margin-top:22px}
     if (t){
       items.push(["Talent", "Place ton point dans <span class=\"talent-pill\">" + (t.fr ? esc(t.fr) : esc(t.en)) + " <span class=\"en\">(" + esc(t.en) + ")</span></span> <span class=\"mono small\">" + r[tid] + "/" + t.max + "</span>" + (t.fr ? "" : " <span class=\"nofr\">nom FR non traduit en jeu</span>")]);
     }
+    if (L > 40) items.push(["Après le 40", "Les sorts du maître voleur vont jusqu'au 60. Les poisons, le parcours de talents, les zones, les donjons et les armes s'arrêtent encore au 40 : cette partie du carnet reste à écrire."]);
     if (SPELLS[L]) items.push(["Maître voleur", spellsHtml(SPELLS[L])]);
     else items.push(["Maître voleur", "<span class=\"small\">Rien à apprendre : les sorts et rangs tombent aux niveaux pairs.</span>"]);
     if (L === 17) items.push(["Rappel", "Vérifie que tu as appris au 16 : " + spellsHtml(SPELLS[16])]);
@@ -683,7 +694,7 @@ footer{margin-top:22px}
       CLASSQ.forEach(function(q){ if (q.key === lv) bits.push("quête de classe"); });
       nx.push("<li><span class=\"mono\">" + lv + "</span><span>" + bits.join(" · ") + "</span></li>");
     }
-    $("nextList").innerHTML = nx.length ? nx.join("") : "<li><span class=\"mono\">40</span><span>Fin de l'outil. Suite du parcours Wowhead : Poussée d'adrénaline au 42, puis Taillader et trancher 5/5.</span></li>";
+    $("nextList").innerHTML = nx.length ? nx.join("") : "<li><span class=\"mono\">60</span><span>Niveau maximum. Fin du carnet.</span></li>";
   }
 
   /* ---------- Rendu : arbre ---------- */

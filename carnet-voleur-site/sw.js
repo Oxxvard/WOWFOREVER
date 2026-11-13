@@ -1,5 +1,5 @@
 /* Carnet du voleur : fonctionne hors ligne une fois ouvert une première fois. */
-const CACHE = "carnet-voleur-v26";
+const CACHE = "carnet-voleur-v27";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -16,6 +16,10 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
+  // Les données vivantes (armurerie) ne doivent jamais être servies depuis le cache :
+  // sinon l'équipement affiché reste figé sur la première lecture.
+  const u = new URL(req.url);
+  if (u.origin !== self.location.origin && req.destination !== "image" && req.destination !== "font") return;
   // Page : réseau d'abord (pour recevoir les mises à jour), cache si hors ligne
   if (req.mode === "navigate") {
     e.respondWith(

@@ -903,9 +903,16 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 
   /* ---------- Mon perso : lecture en direct de l'armurerie ---------- */
   /* Le relais tourne à part : le navigateur n'a pas le droit d'appeler Blizzard depuis ce domaine. */
-  var API = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
+  var API_DEFAUT = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
     ? "http://127.0.0.1:8799"
     : "https://wowforeverapi.onrender.com";
+  /* ?api=https://... règle le relais sans attendre un redéploiement, et le garde. */
+  var API = API_DEFAUT;
+  try {
+    var q = new URLSearchParams(location.search).get("api");
+    if (q){ localStorage.setItem("voleur-api", q); }
+    API = localStorage.getItem("voleur-api") || API_DEFAUT;
+  } catch(e){}
   var PERSO = "oxvar-dinho";
   var SLOTS = [
     ["weapon", "Main droite", function(i){ return i.cat === "melee" && !i.caster; }],
@@ -973,7 +980,11 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       .catch(function(){
         persoEnCours = false;
         $("persoNote").textContent = "hors ligne";
-        $("persoErr").textContent = "Le relais ne répond pas. Il s'endort après quelques minutes sans visite : réessaie dans une minute.";
+        $("persoErr").innerHTML = "Le relais <span class=\"mono small\">" + esc(API.replace(/^https?:\/\//, "")) + "</span> ne répond pas. "
+          + "Sur le palier gratuit il s'endort après quelques minutes sans visite et met une trentaine de secondes à se réveiller. "
+          + '<button type="button" class="chip" id="persoRetry" style="margin-left:6px">Réessayer</button>';
+        var rb = $("persoRetry");
+        if (rb) rb.addEventListener("click", function(){ persoLu = null; chargerPerso(); });
       });
   }
 

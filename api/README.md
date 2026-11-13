@@ -14,8 +14,8 @@ New > Web Service, ce dépôt, puis :
 - Start Command : `node server.js`
 - Variable d'environnement `ORIGINES` : `https://wowforever.onrender.com`
 
-L'URL obtenue doit correspondre à la constante `API` dans
-`carnet-voleur-site/index.html`.
+Déployé sur https://wowforeverapi.onrender.com, l'URL que reprend la constante
+`API` dans `carnet-voleur-site/index.html`.
 
 ## Points d'entrée
 

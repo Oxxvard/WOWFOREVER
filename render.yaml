@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: carnet-voleur
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: carnet-voleur-site
+    headers:
+      # Le service worker et la page ne doivent jamais être gardés par le cache de bord,
+      # sinon une version installée reste bloquée sur l'ancienne.
+      - path: /sw.js
+        name: Cache-Control
+        value: "no-cache, no-store, must-revalidate"
+      - path: /index.html
+        name: Cache-Control
+        value: "no-cache, no-store, must-revalidate"
+  - type: web
+    name: wowforeverapi
+    runtime: node
+    rootDir: api
+    buildCommand: ""
+    startCommand: node server.js
+    envVars:
+      - key: ORIGINES
+        value: https://wowforever.onrender.com

@@ -369,12 +369,34 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 /* Le nom du talent survolé ou choisi s'affiche sous l'arbre, pas dans la case. */
 #tdetail{min-height:3.4em}
 
-/* Mon perso : une ligne par emplacement, le porté à gauche, la cible à droite. */
+/* Mon perso : portrait et caractéristiques à gauche, emplacements à droite. */
+.pgrid{display:grid; grid-template-columns:minmax(210px,270px) minmax(0,1fr); gap:24px; align-items:start}
+@media (max-width:860px){ .pgrid{grid-template-columns:minmax(0,1fr)} }
+.pfiche{border:1px solid var(--line); border-radius:9px; background:var(--panel); overflow:hidden}
+.prendu{display:block; width:100%; height:auto; background:var(--panel2)}
+.pcorps{padding:12px 13px}
+.pcarac{list-style:none; margin:10px 0 0; padding:0; display:grid; grid-template-columns:1fr auto; gap:4px 10px; font-size:.86rem}
+.pcarac dt{color:var(--muted)}
+.pcarac dd{margin:0; font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; color:var(--ink)}
+.pcarac dd.fort{color:var(--rogue); font-weight:700}
+
+/* Une ligne par emplacement, le porté à gauche, la cible à droite. */
 .ptete{display:flex; flex-wrap:wrap; gap:4px 16px; align-items:baseline; margin-bottom:14px}
 .ptete .pn{font-family:var(--f-display); font-size:1.4rem; color:var(--rogue)}
 .ptete .pm{font-size:.84rem; color:var(--muted)}
 .slots{list-style:none; margin:0; padding:0}
-.slots li{display:grid; grid-template-columns:92px minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:baseline; padding:7px 2px; border-bottom:1px solid var(--line)}
+.slots li{display:grid; grid-template-columns:86px 34px minmax(0,1fr) minmax(0,1.1fr); gap:10px; align-items:start; padding:9px 2px; border-bottom:1px solid var(--line)}
+.slots .sl{padding-top:9px} .slots .porte{padding-top:7px}
+.slots .ico{width:32px; height:32px; border-radius:5px; display:block; border:1px solid var(--line-strong); background:var(--panel2)}
+.slots .ico.q3{border-color:var(--q3)} .slots .ico.q2{border-color:var(--q2)} .slots .ico.q4{border-color:#a335ee}
+.slots .porte{min-width:0}
+.slots details{font-size:.86rem}
+.slots summary{cursor:pointer; list-style:none; color:var(--muted)}
+.slots summary::-webkit-details-marker{display:none}
+.slots summary:hover{color:var(--ink)}
+.slots details[open] summary{color:var(--ink)}
+.slots .tip{margin-top:6px}
+@media (max-width:700px){ .slots li{grid-template-columns:34px minmax(0,1fr); gap:3px 8px} .slots .sl{grid-column:1/-1} .slots details{grid-column:1/-1} }
 .slots .sl{font-size:.68rem; letter-spacing:.11em; text-transform:uppercase; color:var(--muted)}
 .slots .vide{color:var(--dim); font-style:italic}
 .slots .cible{font-size:.86rem; color:var(--muted)}
@@ -515,8 +537,10 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 
       <section class="card" data-p="perso">
         <div class="card-head"><h2>Mon perso</h2><span class="note" id="persoNote">lecture de l'armurerie</span></div>
-        <div id="persoTete"></div>
-        <ul class="slots" id="persoStuff"></ul>
+        <div class="pgrid">
+          <div id="persoTete"></div>
+          <ul class="slots" id="persoStuff"></ul>
+        </div>
         <p class="small" id="persoErr" style="margin-top:10px"></p>
       </section>
 
@@ -933,17 +957,31 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   function note(i){ return i.dps || i.armor || 0; }
   function whLien(id, txt){ return '<a href="https://www.wowhead.com/forever/fr/item=' + id + '" target="_blank" rel="noopener">' + txt + '</a>'; }
   var persoLu = null, persoEnCours = false;
+  var CARACS = [["agility","Agilité",1],["strength","Force",0],["stamina","Endurance",0],["spirit","Esprit",0],
+    ["critical-strike","Critique",1,"%"],["attack-power","Puissance d'attaque",1],["attack-dps","DPS",1],
+    ["attack-speed","Vitesse",0],["armor","Armure",0],["dodge","Esquive",0,"%"],["parry","Parade",0,"%"],
+    ["health","Vie",0],["energy","Énergie",0]];
+  function nbr(v){ return (Math.round(v * 10) / 10).toString().replace(".", ","); }
+  function qcls(q){ return q === "rare" ? "q3" : q === "uncommon" ? "q2" : q === "epic" ? "q4" : ""; }
   function renderPerso(){
     if (!persoLu) return;
-    var p = persoLu, lv = p.niveau || L;
-    $("persoTete").innerHTML = '<div class="ptete"><span class="pn">' + esc(p.nom || "?") + '</span>'
-      + '<span class="pm">' + esc([p.race, p.classe].filter(Boolean).join(" · ")) + '</span>'
-      + '<span class="pm">niveau <b class="mono">' + lv + '</b></span>'
-      + '<span class="pm">niveau d\'objet moyen <b class="mono">' + (p.ilvl || "?") + '</b></span></div>';
+    var p = persoLu, lv = p.niveau || L, c = p.carac || {};
+    var img = p.rendu || p.portrait;
+    $("persoTete").innerHTML = '<div class="pfiche">'
+      + (img ? '<img class="prendu" src="' + esc(img) + '" alt="" loading="lazy">' : "")
+      + '<div class="pcorps"><div class="ptete"><span class="pn">' + esc(p.nom || "?") + '</span></div>'
+      + '<p class="small" style="margin:2px 0 0">' + esc([p.race, p.classe].filter(Boolean).join(" · ")) + '</p>'
+      + '<p class="small" style="margin:2px 0 0">niveau <b class="mono">' + lv + '</b> · objet moyen <b class="mono">' + (p.ilvl || "?") + '</b></p>'
+      + '<dl class="pcarac">' + CARACS.filter(function(x){ return c[x[0]] !== undefined; }).map(function(x){
+          return '<dt>' + esc(x[1]) + '</dt><dd class="' + (x[2] ? "fort" : "") + '">' + nbr(c[x[0]]) + (x[3] || "") + '</dd>';
+        }).join("") + '</dl></div></div>';
     var dejaPropose = {};
     $("persoStuff").innerHTML = SLOTS.map(function(sl){
       var porte = (p.stuff || {})[sl[0]];
       if (!porte && !sl[2]) return "";
+      var ico = porte && porte.icone
+        ? '<img class="ico ' + qcls(porte.qualite) + '" src="' + esc(porte.icone) + '" alt="" loading="lazy">'
+        : '<span class="ico"></span>';
       var gauche = porte
         ? whLien(porte.id, esc(porte.nom || ("objet " + porte.id)))
         : '<span class="vide">rien d\'équipé</span>';
@@ -956,13 +994,14 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         if (best){
           if (porte && porte.id === best.id){ droite = "déjà le mieux du carnet"; cls = " ok-deja"; }
           else {
-            var ecart = porte ? "" : "";
-            droite = "à viser : " + nm(best.fr, best.en, best.st)
-              + ' <b>' + (best.dps ? fmt(best.dps) + " DPS" : best.armor + " armure") + '</b>';
+            droite = '<details><summary>' + icon(best) + ' à viser : ' + nm(best.fr, best.en, best.st)
+              + ' <b>' + (best.dps ? fmt(best.dps) + " DPS" : best.armor + " armure") + '</b>'
+              + ' <span class="small">· comment l\'avoir</span></summary>' + tooltip(best) + '</details>';
           }
         }
       }
-      return '<li class="' + cls.trim() + '"><span class="sl">' + esc(sl[1]) + '</span><span>' + gauche + '</span><span class="cible">' + droite + '</span></li>';
+      return '<li class="' + cls.trim() + '"><span class="sl">' + esc(sl[1]) + '</span>' + ico
+        + '<span class="porte">' + gauche + '</span><span class="cible">' + droite + '</span></li>';
     }).join("");
     $("persoNote").textContent = "lu sur l'armurerie";
   }

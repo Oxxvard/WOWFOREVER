@@ -23,21 +23,21 @@ body{margin:0}
 
 /* Layout : barre de niveau collante en haut, puis colonne principale (actions du niveau, arbre, armes) et colonne latérale (parcours, donjons). Une colonne sur téléphone. */
 :root{
-  --bg:#15120d; --panel:#1d1912; --panel2:#262017; --ink:#f0eade; --muted:#ab9f8c; --line:#2f2819;
-  --rogue:#e2b45c; --rogue-ink:#e2b45c; --violet:#c9a85f; --violet-soft:#2a2115;
-  --ok:#8fc97d; --warn:#e8b45f; --dim:#8d8170; --q2:#6fe055; --q3:#6cb4ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark;
+  --bg:#1e1a14; --panel:#262118; --panel2:#2f291e; --ink:#f3eee3; --muted:#b3a794; --line:#3a3223;
+  --rogue:#e8bb66; --rogue-ink:#e8bb66; --violet:#c9a85f; --violet-soft:#332a1c;
+  --ok:#93cf80; --warn:#edb963; --dim:#968a78; --q2:#73e65a; --q3:#71b7ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark;
   --f-display:"Alegreya SC", Georgia, "Times New Roman", serif;
   --f-body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#15120d; --panel:#1d1912; --panel2:#262017; --ink:#f0eade; --muted:#ab9f8c; --line:#2f2819;
-  --rogue:#e2b45c; --rogue-ink:#e2b45c; --violet:#c9a85f; --violet-soft:#2a2115;
-  --ok:#8fc97d; --warn:#e8b45f; --dim:#8d8170; --q2:#6fe055; --q3:#6cb4ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; } }
+  --bg:#1e1a14; --panel:#262118; --panel2:#2f291e; --ink:#f3eee3; --muted:#b3a794; --line:#3a3223;
+  --rogue:#e8bb66; --rogue-ink:#e8bb66; --violet:#c9a85f; --violet-soft:#332a1c;
+  --ok:#93cf80; --warn:#edb963; --dim:#968a78; --q2:#73e65a; --q3:#71b7ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; } }
 :root[data-theme="dark"]{
-  --bg:#15120d; --panel:#1d1912; --panel2:#262017; --ink:#f0eade; --muted:#ab9f8c; --line:#2f2819;
-  --rogue:#e2b45c; --rogue-ink:#e2b45c; --violet:#c9a85f; --violet-soft:#2a2115;
-  --ok:#8fc97d; --warn:#e8b45f; --dim:#8d8170; --q2:#6fe055; --q3:#6cb4ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; }
+  --bg:#1e1a14; --panel:#262118; --panel2:#2f291e; --ink:#f3eee3; --muted:#b3a794; --line:#3a3223;
+  --rogue:#e8bb66; --rogue-ink:#e8bb66; --violet:#c9a85f; --violet-soft:#332a1c;
+  --ok:#93cf80; --warn:#edb963; --dim:#968a78; --q2:#73e65a; --q3:#71b7ff; --q2-icon:#1eff00; --q3-icon:#3d9bff; color-scheme:dark; }
 
 *{box-sizing:border-box}
 body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.5;
@@ -268,23 +268,33 @@ footer{margin-top:22px}
 
 
 /* ---------- Mise en forme ---------- */
-:root{ --accent:var(--rogue); --line-strong:#473d2d; }
-body{font-size:16px; line-height:1.55}
+:root{ --accent:var(--rogue); --line-strong:#524833; }
+/* Une lueur chaude en haut de page : de la profondeur sans motif ni texture. */
+body{font-size:16px; line-height:1.55; background:
+  radial-gradient(1100px 420px at 50% -140px, rgba(232,187,102,.09), transparent 70%),
+  var(--bg); background-attachment:fixed}
 .wrap{max-width:1020px; padding-inline:20px}
+
+/* Le titre porte la direction : grandes capitales, et un filet d'or qui ne traverse pas. */
+.top{padding-top:26px}
+h1{font-size:1.9rem; letter-spacing:.055em; color:var(--ink); line-height:1.1}
+h1::after{content:""; display:block; width:62px; height:2px; margin-top:9px;
+  background:linear-gradient(90deg, var(--accent), rgba(232,187,102,.15))}
+
+/* Titres de section en petites capitales espacées. */
+h2{font-size:.95rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:700}
 
 /* Pas de boîtes imbriquées : un titre, un filet, de l'espace. */
 section.card{background:none; border:0; border-radius:0; padding:0; margin-bottom:30px}
 .card-head{align-items:baseline; margin-bottom:16px; padding-bottom:9px; border-bottom:1px solid var(--line-strong)}
-h1{font-size:1.5rem}
-h2{font-size:1.1rem; color:var(--ink)}
-.card-head .note{font-size:.82rem; color:var(--muted)}
+.card-head .note{font-size:.8rem; color:var(--dim)}
 
 /* Barre de niveau : le grand chiffre porte la page. */
 .levelbar{padding-block:14px 12px; border-bottom:1px solid var(--line-strong)}
 .lvl button{width:36px; height:36px; font-size:1.2rem; background:none; border-color:var(--line-strong); color:var(--muted)}
 .lvl button:hover:not(:disabled){border-color:var(--accent); color:var(--accent)}
 .lvlnum .k{font-size:.68rem; letter-spacing:.16em; color:var(--muted)}
-.lvlnum .v{font-size:2.5rem; color:var(--accent)}
+.lvlnum .v{font-size:2.9rem; color:var(--accent); letter-spacing:.01em; text-shadow:0 0 26px rgba(232,187,102,.22)}
 .pts{font-size:.85rem; color:var(--muted)}
 
 /* Onglets : l'accent dit où tu es, rien d'autre. */
@@ -310,6 +320,7 @@ h2{font-size:1.1rem; color:var(--ink)}
 .ilist > li.soon{box-shadow:inset 2px 0 0 var(--line-strong)}
 .ilist > li.far{opacity:.55}
 .ilist details > summary:hover{background:var(--panel)}
+.tip{background:var(--panel2)}
 .imeta, .isrc{color:var(--muted)}
 .isrc b{color:var(--ok); font-weight:700}
 .isrc b.tbc{color:var(--warn)}
@@ -326,7 +337,7 @@ h2{font-size:1.1rem; color:var(--ink)}
 .ghead{background:none; border-top:0; border-bottom:1px solid var(--line-strong); padding:16px 2px 7px}
 .ghead .gn{font-size:1rem}
 .ghead .gm{font-size:.78rem; color:var(--muted)}
-.lieux{background:none; border-color:var(--line-strong)}
+.lieux{background:var(--panel); border-color:var(--line); border-radius:7px}
 .lieux button{font-size:.88rem; color:var(--muted)}
 .lieux button:hover{background:var(--panel); color:var(--ink)}
 .lieux li.sel button{background:rgba(226,180,92,.1); color:var(--accent)}

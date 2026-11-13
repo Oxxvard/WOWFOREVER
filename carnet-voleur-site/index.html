@@ -786,6 +786,59 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   /* Qui donne la quête et où : identifiant de zone, x, y, nom du PNJ.
      Relevé sur la carte de chaque page de quête Wowhead Forever. */
   var QPNJ = {
+    "loch|Ingrédients de forge":[38,34,46.6,"Morhan Coppertongue"],
+    "loch|Une sombre menace se dessine":[38,46,13.6,"Ingénieur en chef Hinderweir VII"],
+    "loch|Mercenaires":[38,34.6,44.6,"Magistrat Bluntnose"],
+    "loch|ON RECHERCHE : Chok'sul":[38,34.6,44.6,"Magistrat Bluntnose"],
+    "loch|À la défense des terres du roi":[38,23.2,73.8,"Capitaine Rugelfuss"],
+    "loch|L'argent des vagues":[38,40.4,39.4,"Khara Deepwater"],
+    "loch|La vengeance de Vyrin":[38,81.8,64,"Vyrin Swiftwind"],
+    "loch|Outils d'excavation":[38,65.8,65.6,"Prospecteur Ironband"],
+    "ouest|… et cette note que vous avez trouvée":[40,37.5,50.7,"Restes brûlés"],
+    "ouest|La Confrérie défias":[40,55.6,47.4,"Le traître défias"],
+    "ouest|La milice du peuple":[40,56.2,47.6,"Gryan Stoutmantle"],
+    "ouest|Menace sur la côte":[40,30,85.8,"Capitaine Grayson"],
+    "ouest|La côte n'est pas sûre":[40,30,85.8,"Capitaine Grayson"],
+    "ouest|Pauvre Vieille Blanchy !":[40,60,19.4,"Verna Froncebouille"],
+    "ouest|Le trésor caché du capitaine Sanders":[40,40.6,17.1,"Vieille cruche"],
+    "ouest|Le gardien de la flamme":[40,30,85.8,"Capitaine Grayson"],
+    "carmines|Morganth":[12,65.2,69.8,"Theocritus"],
+    "carmines|Avis de recherche : Gath'Ilzogg":[44,29.6,46.3,"Panneau d'avis de recherche"],
+    "carmines|ON RECHERCHE : lieutenant Fangore":[44,26.7,46.6,"Panneau d'avis de recherche"],
+    "carmines|Porté disparu":[44,28.4,12.6,"Caporal Keeshan"],
+    "carmines|Tharil'zun":[44,33.4,48.8,"Maréchal Marris"],
+    "carmines|AVIS DE RECHERCHE : incinérateur Gar'im":[44,24.4,46.3,"Panneau d'avis de recherche"],
+    "carmines|Magie des Ténèbres":[44,33.4,48.8,"Maréchal Marris"],
+    "carmines|Les collines aux hurlements":[44,31,47.4,"Verner Osgood"],
+    "orneval|Les pages perdues":[331,70,71,"Gurda Ragescar"],
+    "orneval|Les druides fous":[331,85.2,44.6,"Kayneth Stillwind"],
+    "orneval|Le nettoyage selon Raene":[331,50.8,75,"Krolg"],
+    "orneval|La chasse achevée":[331,73.6,61.4,"Senani Thunderheart"],
+    "orneval|Le lac Tombeciel":[331,37.2,51.8,"Pelturas Whitemoon"],
+    "orneval|De l'approvisionnement pour Auberdine":[148,43.6,94.4,"Feero Ironhand"],
+    "penombre|La légende de Stalvan":[10,73.6,46.8,"Commandant Althea Ebonlocke"],
+    "penombre|Morbent Fel":[10,7.8,34,"Sven Yorgen"],
+    "penombre|La fiancée de l'Embaumeur":[10,71.8,46.4,"Seigneur Ello Ebonlocke"],
+    "penombre|Worgens dans les bois":[10,75.2,48,"Calor"],
+    "penombre|Mor'Ladim":[10,73.6,46.8,"Commandant Althea Ebonlocke"],
+    "penombre|Le Totem d'affliction":[10,75.8,45.2,"Madame Eva"],
+    "penombre|Les Veilleurs":[10,73.6,46.8,"Commandant Althea Ebonlocke"],
+    "hautebrande|Seigneur Aliden Perenolde":[267,63.2,20.6,"Krusk",1],
+    "hautebrande|Le cadeau de Taretha":[36,39.2,14.4,"Elysa"],
+    "hautebrande|La Couronne de Volonté":[267,62.6,20.6,"Melisara",1],
+    "hautebrande|L'entretien des connaissances":[267,50.4,57,"Maître des traditions Dibbs"],
+    "hautebrande|L'invasion de la prison":[267,61.6,20.8,"Magus Wordeen Voidglare",1],
+    "hautebrande|La vengeance d'Helcular":[267,63.8,19.6,"Novice Thaivand",1],
+    "hautebrande|Nouvelle affectation":[267,51.4,58.4,"Lieutenant Farren Orinelle"],
+    "hautebrande|ON RECHERCHE : baron Vardus":[267,62.6,20.7,"Panneau d'avis de recherche",1],
+    "arathies|L'invocation de la Princesse":[3,51.4,76.8,"Theldurin l'Égaré"],
+    "arathies|La mort venue d’en-bas":[45,32.2,81.4,"Shakes O'Breen"],
+    "arathies|Trol'kalar":[45,28.9,59.6,"Tombeau de Trollbane"],
+    "arathies|Le trésor englouti":[45,33.8,80.4,"Docteur Draxlegauge"],
+    "arathies|La réelle menace":[45,74,33.2,"Korin Fel",1],
+    "arathies|ON RECHERCHE : Otto et Lépervier":[45,46,47.7,"Tableau des recherches"],
+    "arathies|On recherche : Marez Capuche":[45,46,47.7,"Tableau des recherches"],
+    "arathies|La demande de Malin":[45,46.6,47,"Skuerto"],
     "paluns|Une tâche sinistre":[11,45.5,16.4,"Balgaras le Crasseux"],
     "paluns|Entrevoir notre avenir":[11,38.8,52.2,"Prospecteur Whelgar"],
     "paluns|Comprendre notre présent":[11,34.4,52.4,"Gardien de Goaz"],
@@ -795,7 +848,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     "paluns|La vengeance d'Ormer":[11,32.4,50.8,"Grondecroc"],
     "paluns|Rompre le cycle":[11,49.4,42,"Howin Genteplume"]
   };
-  var ZONE_NOM = {11:"Les Paluns",45:"Hautes-terres Arathies",38:"Loch Modan",40:"Marche de l'Ouest",44:"Les Carmines",331:"Orneval",10:"Bois de la Pénombre",267:"Contreforts de Hautebrande"};
+  var ZONE_NOM = {11:"Les Paluns",45:"Hautes-terres Arathies",38:"Loch Modan",40:"Marche de l'Ouest",44:"Les Carmines",331:"Orneval",10:"Bois de la Pénombre",267:"Contreforts de Hautebrande",12:"Forêt d'Elwynn",148:"Sombrivage",36:"Montagnes d'Alterac",3:"Terres ingrates"};
   function carteUrl(z){ return "https://wow.zamimg.com/images/wow/classicplus/maps/frfr/normal/" + z + ".jpg"; }
 
   var QUETES = {
@@ -1241,7 +1294,8 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     var corps = "";
     if (pnj){
       corps = '<div class="qmap"><p class="small">Donnée par <b>' + esc(pnj[3]) + "</b> en <span class=\"mono\">"
-        + nbr(pnj[1]) + ", " + nbr(pnj[2]) + '</span> · ' + esc(ZONE_NOM[pnj[0]] || ("zone " + pnj[0])) + "</p>"
+        + nbr(pnj[1]) + ", " + nbr(pnj[2]) + '</span> · ' + esc(ZONE_NOM[pnj[0]] || ("zone " + pnj[0]))
+        + (pnj[4] ? ' · <span class="elite">donneur en camp Horde, sans doute inaccessible</span>' : "") + "</p>"
         + '<div class="mini"><img src="' + carteUrl(pnj[0]) + '" alt="" loading="lazy">'
         + '<span class="pt" style="left:' + pnj[1] + '%;top:' + pnj[2] + '%"></span></div></div>';
     } else {

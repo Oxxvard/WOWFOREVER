@@ -183,6 +183,10 @@ tr.far{opacity:.5}
 .qn{font-weight:700}
 .qn.q2{color:var(--q2)} .qn.q3{color:var(--q3)}
 .imeta{font-size:.86rem; color:var(--muted); margin-top:1px}
+.isrc{font-size:.82rem; color:var(--muted); margin-top:3px}
+.isrc b{font-family:var(--f-mono); font-variant-numeric:tabular-nums; color:var(--ok); font-weight:700; margin-right:4px}
+.isrc b.tbc{color:var(--warn)}
+.isrc .lbl{text-transform:uppercase; letter-spacing:.05em; font-size:.72rem; font-weight:700; color:var(--muted)}
 .idps{font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; font-size:1rem}
 .idps small{display:block; font-family:var(--f-body); font-size:.72rem; color:var(--muted)}
 .tip{margin:0 10px 12px 68px; padding:12px 14px; border-radius:8px; background:#141720; color:#e6e7ee; font-size:.9rem; display:flex; flex-direction:column; gap:3px; max-width:440px}
@@ -290,6 +294,7 @@ footer{margin-top:22px}
           <button class="chip" type="button" data-f="ranged" aria-pressed="false">Distance</button>
           <button class="chip" type="button" data-f="sword" aria-pressed="false">Épées 1M</button>
           <button class="chip" type="button" data-f="armor" aria-pressed="false">Armure et bijoux</button>
+          <button class="chip" type="button" data-f="drop" aria-pressed="false">À farmer</button>
           <button class="chip hchip" type="button" id="hideH" aria-pressed="true">Masquer le territoire Horde</button>
         </div>
         <p class="small" id="icoStatus" style="margin-bottom:8px"></p>
@@ -488,33 +493,33 @@ footer{margin-top:22px}
   /* ---------- Objets ---------- */
   /* cat : melee | ranged | armor ; lv : niveau requis (ou niveau conseillé si lvNote) */
   var ITEMS = [
-    {id:281257, icon:"inv_weapon_shortblade_04", cat:"melee", kind:"dagger", fr:"Dague-croc de Daguecroc", en:"Daggerfang's Daggerfang", st:1, q:2, slot:"À une main · Dague", dmg:"9 - 18", spd:"1,70", dps:7.94, stats:["+2 Agilité"], lv:14, lvNote:"selon ClassicWoWForever", src:"Quête " + nm(null,"Twisting the Knife",-1) + ", Loch Modan"},
-    {id:279894, icon:"inv_weapon_rifle_01", cat:"ranged", kind:"gun", fr:"Tromblon calibré", en:"Calibrated Blunderbuss", st:1, q:3, slot:"À distance · Arme à feu", dmg:"15 - 29", spd:"2,30", dps:9.57, stats:["+3 Endurance"], lv:14, lvNote:"quête niv. 16", src:"Quête " + nm("Incursion dans le Vieux Forgefer","Old Ironforge Incursion",1) + ", Salle des Thanes"},
-    {id:279900, icon:"inv_pants_01", cat:"armor", kind:"legs", fr:"Chausses creuses-tombes", en:"Deepgrave Trousers", st:1, q:2, slot:"Jambes · Cuir", armor:64, stats:["+3 Agilité","+3 Esprit"], lv:15, lvNote:"quête niv. 15", src:"Quête " + nm("Une rancune ancestrale","An Ancient Grudge",1) + ", Salle des Thanes"},
-    {id:279897, icon:"inv_belt_03", cat:"armor", kind:"belt", fr:"Ceinture poussiéreuse", en:"Dusty Belt", st:1, q:2, slot:"Taille · Cuir", armor:41, stats:["+2 Agilité","+2 Esprit"], lv:15, lvNote:"quête niv. 15", src:"Quête " + nm("Les morts sans repos","The Restless Dead",1) + ", Salle des Thanes"},
-    {id:6448, icon:"inv_weapon_shortblade_10", terr:true, cat:"melee", kind:"dagger", fr:"Dard", en:"Tail Spike", st:1, q:3, slot:"À une main · Dague", dmg:"17 - 33", spd:"1,80", dps:13.89, stats:["+3 Force","+3 Agilité"], lv:16, src:"Skum, " + nm("Cavernes des lamentations","Wailing Caverns",1) + " (Les Tarides)"},
-    {id:285292, icon:"inv_misc_sawblade_01", cat:"ranged", kind:"saw", fr:"Lame de scie émoussée", en:"Dull Sawblade", st:1, q:3, slot:"Armes de jet", dmg:"15 - 28", spd:"1,70", dps:12.65, stats:["+2 Endurance"], eff:["Équipé : +6 à la puissance d'attaque."], lv:16, src:"Sneed's Shredder, " + nm("Mortemines","The Deadmines",1)},
-    {id:2089, icon:"inv_weapon_shortblade_01", cat:"melee", kind:"dagger", fr:"Dague Scrimshaw", en:"Scrimshaw Dagger", st:1, q:2, slot:"À une main · Dague", dmg:"12 - 23", spd:"1,80", dps:9.72, stats:["+2 Endurance"], lv:17, lvNote:"quête niv. 17", src:"Quête " + nm(null,"Red Silk Bandanas",-1) + ", " + nm("Mortemines","The Deadmines",1)},
-    {id:2908, icon:"inv_weapon_shortblade_15", cat:"melee", kind:"dagger", fr:"Aiguillon", en:"Thornblade", st:1, q:2, slot:"À une main · Dague", dmg:"11 - 21", spd:"1,60", dps:10.00, stats:["+3 Agilité"], lv:18, lvNote:"quête niv. 20", src:"Quête " + nm(null,"A Dark Threat Looms",-1) + ", Loch Modan"},
-    {id:6633, icon:"inv_sword_16", terr:true, cat:"melee", kind:"sword", fr:"Hachoir du boucher", en:"Butcher's Slicer", st:1, q:3, slot:"À une main · Épée", dmg:"30 - 57", spd:"2,90", dps:15.00, stats:["+3 Endurance"], eff:["Équipé : +6 à la puissance d'attaque."], lv:18, src:"Tranchegriffe le Boucher (Razorclaw the Butcher), " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + ", environ 42 % en Classic"},
-    {id:5191, icon:"inv_sword_24", cat:"melee", kind:"sword", fr:"Lame de cruauté", en:"Cruel Barb", st:1, q:3, slot:"À une main · Épée", dmg:"30 - 57", spd:"2,80", dps:15.54, stats:[], eff:["Équipé : +12 à la puissance d'attaque."], lv:19, src:"Edwin VanCleef, " + nm("Mortemines","The Deadmines",1) + ", environ 20 %", star:true},
-    {id:1292, icon:"inv_axe_23", terr:true, cat:"melee", kind:"axe", fr:"Fendoir du Boucher", en:"Butcher's Cleaver", st:1, q:3, slot:"À une main · Hache", dmg:"19 - 36", spd:"1,70", dps:16.18, stats:["+5 Force","+2 Agilité"], lv:20, src:"Tranchegriffe le Boucher (Razorclaw the Butcher), " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + ", environ 10 %"},
-    {id:2041, icon:"inv_chest_leather_07", cat:"armor", kind:"chest", fr:"Tunique de la marche de l'Ouest", en:"Tunic of Westfall", st:1, q:3, slot:"Torse · Cuir", armor:92, stats:["+11 Agilité","+5 Endurance"], lv:18, lvNote:"conseillé au 20", src:"Quête " + nm(null,"The Defias Brotherhood",-1) + ", Marche de l'Ouest"},
-    {id:10403, icon:"inv_belt_26", cat:"armor", kind:"belt", fr:"Ceinture défias noircie", en:"Blackened Defias Belt", st:1, q:3, slot:"Taille · Cuir", armor:50, stats:[], eff:["Équipé : +18 à la puissance d'attaque.","Ensemble Cuir défias (5 pièces) : 2 pièces +5 résistance aux Arcanes, 3 pièces +15 puissance d'attaque contre les humanoïdes, 4 pièces saignement possible sur les attaques dans le dos, 5 pièces Dagues +1."], lv:17, src:"Capitaine Vertepeau (Captain Greenskin), " + nm("Mortemines","The Deadmines",1) + ", environ 27 %"},
-    {id:273637, icon:"inv_sword_05", terr:true, cat:"melee", kind:"sword", fr:"Lame d'Argelaine", en:"Blade of Silverlaine", st:1, q:3, slot:"Main droite · Épée", dmg:"17 - 33", spd:"2,30", dps:10.87, stats:["+6 résistance à l'Ombre"], eff:["Équipé : +28 aux dégâts et soins des sorts."], lv:21, src:"Baron Silverlaine, " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1) + ", moins de 2 %", caster:true},
-    {id:3463, icon:"ability_upgrademoonglaive", cat:"ranged", kind:"thrown", fr:"Etoile d'argent", en:"Silver Star", st:1, q:2, slot:"Armes de jet", dmg:"26 - 49", spd:"2,30", dps:16.30, stats:["+4 Agilité"], lv:22, src:"Quête " + nm(null,"Scramble",-1) + ", Les Serres-Rocheuses (Stonetalon). Un site la classe côté Horde : à vérifier en jeu"},
-    {id:6220, icon:"inv_weapon_shortblade_25", terr:true, cat:"melee", kind:"dagger", fr:"Fragment de météore", en:"Meteor Shard", st:1, q:3, slot:"À une main · Dague", dmg:"22 - 42", spd:"1,80", dps:17.78, stats:["+3 résistance au Feu"], eff:["Chances quand vous touchez : inflige 42 points de dégâts de Feu.", "Unique - Équipé"], lv:23, src:"Archimage Arugal (Archmage Arugal), " + nm("Donjon d'Ombrecroc","Shadowfang Keep",1)},
-    {id:6904, icon:"inv_misc_monsterfang_01", cat:"melee", kind:"fang", fr:"Morsure de Serra'kis", en:"Bite of Serra'kis", st:1, q:3, slot:"À une main · Dague", dmg:"16 - 30", spd:"1,30", dps:17.69, stats:["+2 résistance à la Nature"], eff:["Chances quand vous touchez : poison, 14 dégâts de Nature toutes les 3 s pendant 9 s."], lv:23, src:"Old Serra'kis, " + nm("Profondeurs de Brassenoire","Blackfathom Deeps",1)},
-    {id:277210, icon:"inv_jewelry_ring_02", terr:true, cat:"armor", kind:"ring", fr:"Chevalière de Bois-du-Bûcher", en:"Pyrewood Signet Ring", st:1, q:3, slot:"Doigt", stats:["+4 Agilité","+4 Endurance"], eff:["Équipé : +0,4 % de chances de toucher."], lv:23, lvNote:"quête de classe", src:"Quête " + nm(null,"The Horn of Xelthos",-1) + ", Pins argentés"},
-    {id:273827, icon:"inv_sword_24", cat:"melee", kind:"sword", fr:"Collecteuse de dettes", en:"Debt Collector", st:1, q:3, slot:"Main droite · Épée", dmg:"21 - 39", spd:"2,30", dps:13.04, stats:[], eff:["Équipé : +34 aux dégâts et soins des sorts."], lv:26, src:"Bazil Thredd, " + nm("La Prison","The Stockade",1), caster:true},
-    {id:9453, icon:"inv_weapon_shortblade_02", cat:"melee", kind:"dagger", fr:"Vengeresse empoisonnée", en:"Toxic Revenger", st:1, q:3, slot:"À une main · Dague", dmg:"27 - 51", spd:"1,90", dps:20.53, stats:[], eff:["Chances quand vous touchez : nuage toxique, 14 dégâts de Nature toutes les 3 s pendant 12 s.", "Unique - Équipé"], lv:27, src:"Retombée visqueuse (Viscous Fallout), Gnomeregan"},
-    {id:6681, icon:"inv_weapon_shortblade_10", terr:true, cat:"melee", kind:"dagger", fr:"Fleur d'épines", en:"Thornspike", st:1, q:3, slot:"À une main · Dague", dmg:"24 - 46", spd:"1,70", dps:20.59, stats:[], eff:["Chances quand vous touchez : épines de 45 dégâts qui rebondissent sur un ennemi proche."], lv:27, src:"Aggem Malépine (Aggem Thorncurse), " + nm("Kraal de Tranchebauge","Razorfen Kraul",1)},
-    {id:7682, icon:"inv_spear_01", terr:true, cat:"melee", kind:"dagger", fr:"Tisonnier de torture", en:"Torturing Poker", st:1, q:3, slot:"À une main · Dague", dmg:"22 - 45", spd:"1,70", dps:19.63, stats:[], eff:["Équipé : tes coups empilent une brûlure, jusqu'à 10 fois.", "Unique - Équipé"], lv:29, src:"Interrogateur Vislar (Interrogator Vishas), " + nm("Monastère écarlate","Scarlet Monastery",1) + ", environ 10 %"},
-    {id:7683, icon:"inv_gauntlets_11", terr:true, cat:"melee", kind:"fist", fr:"Coup de poing sanglant en laiton", en:"Bloody Brass Knuckles", st:1, q:3, slot:"À une main · Arme de pugilat", dmg:"24 - 46", spd:"1,60", dps:21.88, stats:[], eff:["Équipé : +12 à la puissance d'attaque.", "Équipé : +15 à la puissance d'attaque contre les humanoïdes."], lv:29, src:"Interrogateur Vislar (Interrogator Vishas), " + nm("Monastère écarlate","Scarlet Monastery",1)},
-    {id:277246, icon:"inv_sword_07", terr:true, cat:"melee", kind:"sword", fr:"Lame ornée de rubis", en:"Ruby-Adorned Blade", st:1, q:3, slot:"À une main · Épée", dmg:"38 - 72", spd:"2,30", dps:23.91, stats:["+3 Agilité","+8 Endurance"], lv:30, lvNote:"lettre de C vers 30", src:"Quête de classe " + nm(null,"The Eye of Bhossca",-1) + ", solo au Monastère écarlate", star:true},
-    {id:281314, icon:"inv_weapon_shortblade_01", cat:"melee", kind:"dagger", fr:"Croc de Dragon soumis", en:"Subdued Dragon's Fang", st:1, q:3, slot:"À une main · Dague", dmg:"24 - 46", spd:"1,70", dps:20.59, stats:["+7 Agilité","+2 Endurance"], lv:32, src:"Quête élite " + nm(null,"Stopping the Cycle",-1) + ", Les Paluns (dès 24)"},
-    {id:6829, icon:"inv_sword_27", terr:true, cat:"melee", kind:"sword", fr:null, en:"Sword of Serenity", st:-1, q:3, slot:"À une main · Épée", dmg:"46 - 86", spd:"2,20", dps:30.00, stats:["+9 Endurance","+4 Esprit"], lv:37, lvNote:"pas encore traduit en jeu", src:"Quête " + nm(null,"In the Name of the Light",-1) + ", Monastère écarlate (niv. 40)"},
-    {id:10823, icon:"inv_sword_35", terr:true, cat:"melee", kind:"sword", fr:null, en:"Vanquisher's Sword", st:-1, q:3, slot:"À une main · Épée", dmg:"46 - 86", spd:"2,20", dps:30.00, stats:[], eff:["Équipé : +22 à la puissance d'attaque."], lv:39, lvNote:"pas encore traduit en jeu", src:"Quête " + nm(null,"Bring the Light",-1) + ", Souilles de Tranchebauge (Razorfen Downs), niv. 42"}
+    {id:281257, icon:"inv_weapon_shortblade_04", cat:"melee", kind:"dagger", fr:"Dague-croc de Daguecroc", en:"Daggerfang's Daggerfang", st:1, q:2, slot:"À une main · Dague", dmg:"9 - 18", spd:"1,70", dps:7.94, stats:["+2 Agilité"], lv:14, lvNote:"selon ClassicWoWForever", from:"quete", quest:[null,"Twisting the Knife",-1], zone:"Loch Modan"},
+    {id:279894, icon:"inv_weapon_rifle_01", cat:"ranged", kind:"gun", fr:"Tromblon calibré", en:"Calibrated Blunderbuss", st:1, q:3, slot:"À distance · Arme à feu", dmg:"15 - 29", spd:"2,30", dps:9.57, stats:["+3 Endurance"], lv:14, lvNote:"quête niv. 16", from:"quete", quest:["Incursion dans le Vieux Forgefer","Old Ironforge Incursion",1], lieu:["Salle des Thanes","Hall of Thanes",1]},
+    {id:279900, icon:"inv_pants_01", cat:"armor", kind:"legs", fr:"Chausses creuses-tombes", en:"Deepgrave Trousers", st:1, q:2, slot:"Jambes · Cuir", armor:64, stats:["+3 Agilité","+3 Esprit"], lv:15, lvNote:"quête niv. 15", from:"quete", quest:["Une rancune ancestrale","An Ancient Grudge",1], lieu:["Salle des Thanes","Hall of Thanes",1]},
+    {id:279897, icon:"inv_belt_03", cat:"armor", kind:"belt", fr:"Ceinture poussiéreuse", en:"Dusty Belt", st:1, q:2, slot:"Taille · Cuir", armor:41, stats:["+2 Agilité","+2 Esprit"], lv:15, lvNote:"quête niv. 15", from:"quete", quest:["Les morts sans repos","The Restless Dead",1], lieu:["Salle des Thanes","Hall of Thanes",1]},
+    {id:6448, icon:"inv_weapon_shortblade_10", terr:true, cat:"melee", kind:"dagger", fr:"Dard", en:"Tail Spike", st:1, q:3, slot:"À une main · Dague", dmg:"17 - 33", spd:"1,80", dps:13.89, stats:["+3 Force","+3 Agilité"], lv:16, from:"drop", mob:["Skum","Skum",1], lieu:["Cavernes des lamentations","Wailing Caverns",1], zone:"Les Tarides", drop:28.59, dropSt:1},
+    {id:285292, icon:"inv_misc_sawblade_01", cat:"ranged", kind:"saw", fr:"Lame de scie émoussée", en:"Dull Sawblade", st:1, q:3, slot:"Armes de jet", dmg:"15 - 28", spd:"1,70", dps:12.65, stats:["+2 Endurance"], eff:["Équipé : +6 à la puissance d'attaque."], lv:16, from:"drop", mob:[null,"Sneed's Shredder",-1], lieu:["Mortemines","The Deadmines",1], drop:27.16, dropSt:1},
+    {id:2089, icon:"inv_weapon_shortblade_01", cat:"melee", kind:"dagger", fr:"Dague Scrimshaw", en:"Scrimshaw Dagger", st:1, q:2, slot:"À une main · Dague", dmg:"12 - 23", spd:"1,80", dps:9.72, stats:["+2 Endurance"], lv:17, lvNote:"quête niv. 17", from:"quete", quest:[null,"Red Silk Bandanas",-1], lieu:["Mortemines","The Deadmines",1]},
+    {id:2908, icon:"inv_weapon_shortblade_15", cat:"melee", kind:"dagger", fr:"Aiguillon", en:"Thornblade", st:1, q:2, slot:"À une main · Dague", dmg:"11 - 21", spd:"1,60", dps:10.00, stats:["+3 Agilité"], lv:18, lvNote:"quête niv. 20", from:"quete", quest:[null,"A Dark Threat Looms",-1], zone:"Loch Modan"},
+    {id:6633, icon:"inv_sword_16", terr:true, cat:"melee", kind:"sword", fr:"Hachoir du boucher", en:"Butcher's Slicer", st:1, q:3, slot:"À une main · Épée", dmg:"30 - 57", spd:"2,90", dps:15.00, stats:["+3 Endurance"], eff:["Équipé : +6 à la puissance d'attaque."], lv:18, from:"drop", mob:["Tranchegriffe le Boucher","Razorclaw the Butcher",1], lieu:["Donjon d'Ombrecroc","Shadowfang Keep",1], drop:30.22, dropSt:1},
+    {id:5191, icon:"inv_sword_24", cat:"melee", kind:"sword", fr:"Lame de cruauté", en:"Cruel Barb", st:1, q:3, slot:"À une main · Épée", dmg:"30 - 57", spd:"2,80", dps:15.54, stats:[], eff:["Équipé : +12 à la puissance d'attaque."], lv:19, from:"drop", mob:["Edwin VanCleef","Edwin VanCleef",1], lieu:["Mortemines","The Deadmines",1], drop:20, dropSt:0, star:true},
+    {id:1292, icon:"inv_axe_23", terr:true, cat:"melee", kind:"axe", fr:"Fendoir du Boucher", en:"Butcher's Cleaver", st:1, q:3, slot:"À une main · Hache", dmg:"19 - 36", spd:"1,70", dps:16.18, stats:["+5 Force","+2 Agilité"], lv:20, from:"drop", mob:["Tranchegriffe le Boucher","Razorclaw the Butcher",1], lieu:["Donjon d'Ombrecroc","Shadowfang Keep",1], drop:10, dropSt:0},
+    {id:2041, icon:"inv_chest_leather_07", cat:"armor", kind:"chest", fr:"Tunique de la marche de l'Ouest", en:"Tunic of Westfall", st:1, q:3, slot:"Torse · Cuir", armor:92, stats:["+11 Agilité","+5 Endurance"], lv:18, lvNote:"conseillé au 20", from:"quete", quest:[null,"The Defias Brotherhood",-1], zone:"Marche de l'Ouest"},
+    {id:10403, icon:"inv_belt_26", cat:"armor", kind:"belt", fr:"Ceinture défias noircie", en:"Blackened Defias Belt", st:1, q:3, slot:"Taille · Cuir", armor:50, stats:[], eff:["Équipé : +18 à la puissance d'attaque.","Ensemble Cuir défias (5 pièces) : 2 pièces +5 résistance aux Arcanes, 3 pièces +15 puissance d'attaque contre les humanoïdes, 4 pièces saignement possible sur les attaques dans le dos, 5 pièces Dagues +1."], lv:17, from:"drop", mob:["Capitaine Vertepeau","Captain Greenskin",1], lieu:["Mortemines","The Deadmines",1], drop:27, dropSt:0},
+    {id:273637, icon:"inv_sword_05", terr:true, cat:"melee", kind:"sword", fr:"Lame d'Argelaine", en:"Blade of Silverlaine", st:1, q:3, slot:"Main droite · Épée", dmg:"17 - 33", spd:"2,30", dps:10.87, stats:["+6 résistance à l'Ombre"], eff:["Équipé : +28 aux dégâts et soins des sorts."], lv:21, from:"drop", mob:["Baron Silverlaine","Baron Silverlaine",1], lieu:["Donjon d'Ombrecroc","Shadowfang Keep",1], drop:2, dropSt:0, dropNote:"moins de 2 %", caster:true},
+    {id:3463, icon:"ability_upgrademoonglaive", cat:"ranged", kind:"thrown", fr:"Etoile d'argent", en:"Silver Star", st:1, q:2, slot:"Armes de jet", dmg:"26 - 49", spd:"2,30", dps:16.30, stats:["+4 Agilité"], lv:22, from:"quete", quest:[null,"Scramble",-1], zone:"Les Serres-Rocheuses (Stonetalon)", note:"Un site la classe côté Horde : à vérifier en jeu"},
+    {id:6220, icon:"inv_weapon_shortblade_25", terr:true, cat:"melee", kind:"dagger", fr:"Fragment de météore", en:"Meteor Shard", st:1, q:3, slot:"À une main · Dague", dmg:"22 - 42", spd:"1,80", dps:17.78, stats:["+3 résistance au Feu"], eff:["Chances quand vous touchez : inflige 42 points de dégâts de Feu.", "Unique - Équipé"], lv:23, from:"drop", mob:["Archimage Arugal","Archmage Arugal",1], lieu:["Donjon d'Ombrecroc","Shadowfang Keep",1], drop:28.71, dropSt:1},
+    {id:6904, icon:"inv_misc_monsterfang_01", cat:"melee", kind:"fang", fr:"Morsure de Serra'kis", en:"Bite of Serra'kis", st:1, q:3, slot:"À une main · Dague", dmg:"16 - 30", spd:"1,30", dps:17.69, stats:["+2 résistance à la Nature"], eff:["Chances quand vous touchez : poison, 14 dégâts de Nature toutes les 3 s pendant 9 s."], lv:23, from:"drop", mob:["Old Serra'kis","Old Serra'kis",1], lieu:["Profondeurs de Brassenoire","Blackfathom Deeps",1], drop:31.9, dropSt:1},
+    {id:277210, icon:"inv_jewelry_ring_02", terr:true, cat:"armor", kind:"ring", fr:"Chevalière de Bois-du-Bûcher", en:"Pyrewood Signet Ring", st:1, q:3, slot:"Doigt", stats:["+4 Agilité","+4 Endurance"], eff:["Équipé : +0,4 % de chances de toucher."], lv:23, lvNote:"quête de classe", from:"quete", quest:[null,"The Horn of Xelthos",-1], zone:"Pins argentés"},
+    {id:273827, icon:"inv_sword_24", cat:"melee", kind:"sword", fr:"Collecteuse de dettes", en:"Debt Collector", st:1, q:3, slot:"Main droite · Épée", dmg:"21 - 39", spd:"2,30", dps:13.04, stats:[], eff:["Équipé : +34 aux dégâts et soins des sorts."], lv:26, from:"drop", mob:["Bazil Thredd","Bazil Thredd",1], lieu:["La Prison","The Stockade",1], drop:23.94, dropSt:1, caster:true},
+    {id:9453, icon:"inv_weapon_shortblade_02", cat:"melee", kind:"dagger", fr:"Vengeresse empoisonnée", en:"Toxic Revenger", st:1, q:3, slot:"À une main · Dague", dmg:"27 - 51", spd:"1,90", dps:20.53, stats:[], eff:["Chances quand vous touchez : nuage toxique, 14 dégâts de Nature toutes les 3 s pendant 12 s.", "Unique - Équipé"], lv:27, from:"drop", mob:["Retombée visqueuse","Viscous Fallout",1], lieu:["Gnomeregan","Gnomeregan",1], drop:34.13, dropSt:1},
+    {id:6681, icon:"inv_weapon_shortblade_10", terr:true, cat:"melee", kind:"dagger", fr:"Fleur d'épines", en:"Thornspike", st:1, q:3, slot:"À une main · Dague", dmg:"24 - 46", spd:"1,70", dps:20.59, stats:[], eff:["Chances quand vous touchez : épines de 45 dégâts qui rebondissent sur un ennemi proche."], lv:27, from:"drop", mob:["Aggem Malépine","Aggem Thorncurse",1], lieu:["Kraal de Tranchebauge","Razorfen Kraul",1], drop:33.4, dropSt:1},
+    {id:7682, icon:"inv_spear_01", terr:true, cat:"melee", kind:"dagger", fr:"Tisonnier de torture", en:"Torturing Poker", st:1, q:3, slot:"À une main · Dague", dmg:"22 - 45", spd:"1,70", dps:19.63, stats:[], eff:["Équipé : tes coups empilent une brûlure, jusqu'à 10 fois.", "Unique - Équipé"], lv:29, from:"drop", mob:["Interrogateur Vislar","Interrogator Vishas",1], lieu:["Monastère écarlate","Scarlet Monastery",1], drop:10, dropSt:0},
+    {id:7683, icon:"inv_gauntlets_11", terr:true, cat:"melee", kind:"fist", fr:"Coup de poing sanglant en laiton", en:"Bloody Brass Knuckles", st:1, q:3, slot:"À une main · Arme de pugilat", dmg:"24 - 46", spd:"1,60", dps:21.88, stats:[], eff:["Équipé : +12 à la puissance d'attaque.", "Équipé : +15 à la puissance d'attaque contre les humanoïdes."], lv:29, from:"drop", mob:["Interrogateur Vislar","Interrogator Vishas",1], lieu:["Monastère écarlate","Scarlet Monastery",1], drop:28.85, dropSt:1},
+    {id:277246, icon:"inv_sword_07", terr:true, cat:"melee", kind:"sword", fr:"Lame ornée de rubis", en:"Ruby-Adorned Blade", st:1, q:3, slot:"À une main · Épée", dmg:"38 - 72", spd:"2,30", dps:23.91, stats:["+3 Agilité","+8 Endurance"], lv:30, lvNote:"lettre de C vers 30", from:"quete", quest:[null,"The Eye of Bhossca",-1], lieu:["Monastère écarlate","Scarlet Monastery",1], note:"Quête de classe, en solo", star:true},
+    {id:281314, icon:"inv_weapon_shortblade_01", cat:"melee", kind:"dagger", fr:"Croc de Dragon soumis", en:"Subdued Dragon's Fang", st:1, q:3, slot:"À une main · Dague", dmg:"24 - 46", spd:"1,70", dps:20.59, stats:["+7 Agilité","+2 Endurance"], lv:32, from:"quete", quest:[null,"Stopping the Cycle",-1], zone:"Les Paluns", note:"Quête élite, dès 24"},
+    {id:6829, icon:"inv_sword_27", terr:true, cat:"melee", kind:"sword", fr:null, en:"Sword of Serenity", st:-1, q:3, slot:"À une main · Épée", dmg:"46 - 86", spd:"2,20", dps:30.00, stats:["+9 Endurance","+4 Esprit"], lv:37, lvNote:"pas encore traduit en jeu", from:"quete", quest:[null,"In the Name of the Light",-1], lieu:["Monastère écarlate","Scarlet Monastery",1], note:"Quête de niveau 40"},
+    {id:10823, icon:"inv_sword_35", terr:true, cat:"melee", kind:"sword", fr:null, en:"Vanquisher's Sword", st:-1, q:3, slot:"À une main · Épée", dmg:"46 - 86", spd:"2,20", dps:30.00, stats:[], eff:["Équipé : +22 à la puissance d'attaque."], lv:39, lvNote:"pas encore traduit en jeu", from:"quete", quest:[null,"Bring the Light",-1], lieu:["Souilles de Tranchebauge","Razorfen Downs",1], note:"Quête de niveau 42"}
   ];
   var ICONS = {
     sword:'<path d="M14.5 22.5L31 6h3v3L17.5 25.5z" fill="url(#gMetal)" stroke="#14161d" stroke-width=".9" stroke-linejoin="round"/><path d="M16.2 23.8L32.5 7.5" stroke="#fff" stroke-opacity=".6" stroke-width=".7"/><path d="M9.5 20.5l10 10" stroke="#14161d" stroke-width="5" stroke-linecap="round"/><path d="M9.5 20.5l10 10" stroke="url(#gGold)" stroke-width="3.2" stroke-linecap="round"/><path d="M13.6 26.4L7.5 32.5" stroke="#14161d" stroke-width="4.2" stroke-linecap="round"/><path d="M13.6 26.4L7.5 32.5" stroke="#6a4120" stroke-width="2.6" stroke-linecap="round"/><path d="M12 28l1 1M10.4 29.6l1 1" stroke="#c99a5a" stroke-width=".8"/><circle cx="6.4" cy="33.6" r="2.6" fill="url(#gGold)" stroke="#14161d" stroke-width=".9"/><circle cx="14.5" cy="25.5" r="1.4" fill="url(#gGem)"/>',
@@ -555,6 +560,47 @@ footer{margin-top:22px}
     return '<span class="qn q' + (it.q || 0) + '">' + inner + '</span>';
   }
   function fmt(n){ return n.toFixed(1).replace(".", ","); }
+  /* ---------- Provenance : drop ou quete ---------- */
+  function nmA(a){
+    if (!a) return "";
+    if (a[0] && a[0] === a[1]) return '<span class="fr">' + esc(a[0]) + '</span>';
+    return nm(a[0], a[1], a[2]);
+  }
+  function pctTxt(it){
+    if (it.dropNote) return it.dropNote;
+    if (it.drop == null) return "taux inconnu";
+    var n = Math.round(it.drop * 10) / 10;
+    return String(n).replace(".", ",") + " %";
+  }
+  function lieuHtml(it){
+    var p = it.lieu ? nmA(it.lieu) : "";
+    if (it.zone) p += (p ? " " : "") + '<span class="en">' + esc(it.zone) + '</span>';
+    return p;
+  }
+  function lieuTxt(it){
+    var p = it.lieu ? (it.lieu[0] || it.lieu[1]) : "";
+    if (it.zone) p += (p ? ", " : "") + it.zone;
+    return p;
+  }
+  function srcHtml(it){
+    var s;
+    if (it.from === "drop"){
+      s = "Drop sur " + nmA(it.mob) + ", " + lieuHtml(it) + " · " + esc(pctTxt(it));
+      if (it.dropSt !== 1) s += " (taux à confirmer, non lu sur Wowhead Forever)";
+    } else {
+      s = "Quête " + nmA(it.quest) + (lieuHtml(it) ? ", " + lieuHtml(it) : "");
+    }
+    if (it.note) s += ". " + esc(it.note);
+    return s;
+  }
+  function srcLine(it){
+    if (it.from === "drop"){
+      return '<p class="isrc"><b class="' + (it.dropSt === 1 ? "" : "tbc") + '">' + esc(pctTxt(it)) + '</b> '
+        + esc(it.mob ? (it.mob[0] || it.mob[1]) : "") + ' · ' + esc(lieuTxt(it)) + '</p>';
+    }
+    return '<p class="isrc"><span class="lbl">Quête</span>' + (lieuTxt(it) ? ' · ' + esc(lieuTxt(it)) : '') + '</p>';
+  }
+
   function tooltip(it){
     var t = '<div class="tip">';
     t += '<span class="tq' + (it.q || 0) + '">' + esc(it.fr || it.en) + '</span>';
@@ -570,7 +616,7 @@ footer{margin-top:22px}
       if (it.caster) t += '<span class="cav">Bonus de sorts : arme de lanceur, faible pour un voleur.</span>';
     }
     t += '<span class="lvl">' + (it.lvNote ? "Niveau conseillé " + it.lv + " (" + esc(it.lvNote) + ")" : "Niveau " + it.lv + " requis") + '</span>';
-    t += '<span class="src">' + it.src + '</span>';
+    t += '<span class="src">' + srcHtml(it) + '</span>';
     if (it.id) t += '<span class="src"><a href="https://www.wowhead.com/forever/fr/item=' + it.id + '" target="_blank" rel="noopener">Voir sur Wowhead (icône officielle)</a></span>';
     return t + '</div>';
   }
@@ -690,11 +736,11 @@ footer{margin-top:22px}
     if (have.length){
       var h = have[0];
       var why = prefUsed ? (hns ? "Taillader et trancher : une épée ou une hache en main droite permet à Attaque pernicieuse de déclencher l'attaque supplémentaire." : "Arme lente en main droite : Attaque pernicieuse frappe plus fort.") : (pref ? "Ton " + (hns ? "épée ou ta hache" : "arme lente") + " (" + esc(pref.fr || pref.en) + ") a plus de 10 % de DPS en moins : prends la plus forte." : "Pas encore d'" + (hns ? "épée ni de hache" : "arme lente") + " accessible : prends la plus forte.");
-      b += '<div class="bestbox go"><span class="tag">Main droite conseillée</span><div class="bhead">' + icon(h) + '<div style="min-width:0">' + qname(h) + '<p class="small">' + esc(h.slot) + ' · ' + esc(h.spd) + ' · ' + fmt(h.dps) + ' DPS</p></div></div><p class="small" style="margin-top:6px">' + h.src + '</p><p class="small" style="margin-top:4px">' + why + '</p>' + (oh ? '<p class="small" style="margin-top:6px"><b>Main gauche :</b> ' + nm(oh.fr, oh.en, oh.st) + ' (' + esc(oh.spd) + ', ' + fmt(oh.dps) + ' DPS)</p>' : '') + '</div>';
+      b += '<div class="bestbox go"><span class="tag">Main droite conseillée</span><div class="bhead">' + icon(h) + '<div style="min-width:0">' + qname(h) + '<p class="small">' + esc(h.slot) + ' · ' + esc(h.spd) + ' · ' + fmt(h.dps) + ' DPS</p></div></div><p class="small" style="margin-top:6px">' + srcHtml(h) + '</p><p class="small" style="margin-top:4px">' + why + '</p>' + (oh ? '<p class="small" style="margin-top:6px"><b>Main gauche :</b> ' + nm(oh.fr, oh.en, oh.st) + ' (' + esc(oh.spd) + ', ' + fmt(oh.dps) + ' DPS)</p>' : '') + '</div>';
     }
     if (soon.length){
       var s0 = soon[0];
-      b += '<div class="bestbox soon"><span class="tag">Prochaine cible · niveau ' + s0.lv + '</span><div class="bhead">' + icon(s0) + '<div style="min-width:0">' + qname(s0) + '<p class="small">' + esc(s0.slot) + (s0.dps ? ' · ' + fmt(s0.dps) + ' DPS' : '') + '</p></div></div><p class="small" style="margin-top:6px">' + s0.src + '</p></div>';
+      b += '<div class="bestbox soon"><span class="tag">Prochaine cible · niveau ' + s0.lv + '</span><div class="bhead">' + icon(s0) + '<div style="min-width:0">' + qname(s0) + '<p class="small">' + esc(s0.slot) + (s0.dps ? ' · ' + fmt(s0.dps) + ' DPS' : '') + '</p></div></div><p class="small" style="margin-top:6px">' + srcHtml(s0) + '</p></div>';
     } else {
       b += '<div class="bestbox"><span class="tag">Prochaine cible</span><p class="small">Au-delà, vise les quêtes du Monastère écarlate et des Souilles de Tranchebauge.</p></div>';
     }
@@ -704,12 +750,13 @@ footer{margin-top:22px}
     var rows = BASE.filter(function(i){
         if (filter === "all") return true;
         if (filter === "sword") return i.kind === "sword";
+        if (filter === "drop") return i.from === "drop";
         return i.cat === filter;
       })
       .slice().sort(function(a,b){ return a.lv - b.lv; })
       .map(function(i){
         var st = stateOf(i), lab = st === "ok" ? "Équipable" : (st === "soon" ? "Bientôt" : "Plus tard");
-        return '<li class="' + st + '"><details><summary>' + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p></div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + lab + '</span></div></summary>' + tooltip(i) + '</details></li>';
+        return '<li class="' + st + '"><details><summary>' + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p>' + srcLine(i) + '</div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + lab + '</span></div></summary>' + tooltip(i) + '</details></li>';
       });
     $("wbody").innerHTML = (rows.join("") || '<li style="padding:12px" class="small">Aucun objet dans ce filtre.</li>') + (hidden ? '<li style="padding:10px 12px" class="small">' + hidden + ' objets masqués : donjons et quêtes en territoire Horde (Pins argentés, Les Tarides, Tirisfal). Désactive le filtre pour les voir.</li>' : '');
   }

@@ -10,7 +10,7 @@ Application web (une page, installable) de leveling pour un voleur elfe de la nu
   - `PATH` : talent pris à chaque niveau, de 10 à 40 (ordre du guide de leveling Combat Wowhead)
   - `SPELLS`, `POISONS` : sorts et poisons par niveau (obligatoire ou facultatif, d'après Wowhead)
   - `CLASSQ` : quêtes de classe, `ROUTE` : parcours de zones, `DJ` : donjons
-  - `ITEMS` : armes et équipement, avec stats et nom d'icône Wowhead (`icon`)
+  - `ITEMS` : armes et équipement, avec stats et nom d'icône Wowhead (`icon`). Provenance structurée : `from` vaut `drop` ou `quete` ; `mob`, `lieu`, `quest` sont des triplets `[fr, en, st]` passés à `nm()` ; `zone` est une chaîne ; `drop` est le pourcentage et `dropSt` vaut 1 si le taux est lu sur Wowhead Forever, 0 s'il reste à confirmer. `srcHtml()` et `srcLine()` les mettent en forme, ne plus écrire de champ `src` en texte libre
   - `TQ`, `TB` : quêtes et boss de la Salle des Thanes
 - `carnet-voleur-site/sw.js` : service worker (mode hors ligne).
 - `carnet-voleur-site/manifest.webmanifest` et `icons/` : installation en application.

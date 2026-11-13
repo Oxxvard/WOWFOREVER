@@ -349,12 +349,19 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .more{display:block; margin-top:4px; background:none; border:0; padding:0; color:var(--muted); font-family:var(--f-body); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer}
 .more:hover{color:var(--accent)}
 
-/* Arbre de talents : la case montre l'icône du jeu. */
-.node .ti{display:block; margin:0 auto 5px; width:30px; height:30px; border-radius:5px; border:1px solid rgba(0,0,0,.6); filter:grayscale(1) brightness(.55)}
+/* Arbre de talents : panneau étroit et haut, comme en jeu. Une case = une icône. */
+.tree{grid-template-columns:32px repeat(4, 56px); gap:6px; justify-content:start}
+.node{position:relative; aspect-ratio:1/1; min-height:0; padding:0; display:flex; align-items:center; justify-content:center; border-radius:6px}
+.node .ti{display:block; margin:0; width:40px; height:40px; border-radius:4px; border:1px solid rgba(0,0,0,.6); filter:grayscale(1) brightness(.5)}
 .node.has .ti, .node.full .ti{filter:none}
-.node{text-align:center; font-size:.76rem; line-height:1.25}
-.node .nfr{display:block}
-.node .nr{display:block; margin-top:3px}
+.node .nfr{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%)}
+.node .nr{position:absolute; right:2px; bottom:1px; margin:0; font-family:var(--f-mono); font-size:.66rem; line-height:1.4; padding:0 3px;
+  background:rgba(0,0,0,.72); border-radius:3px; color:var(--ink)}
+.node.full .nr{color:var(--rogue)}
+.node.full .nr::after{content:""}
+.tier-lab{font-size:.64rem}
+/* Le nom du talent survolé ou choisi s'affiche sous l'arbre, pas dans la case. */
+#tdetail{min-height:3.4em}
 
 /* Replis. */
 .help summary, .fold summary{font-size:.84rem; color:var(--muted)}
@@ -939,7 +946,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         if (PATH[L] === id) cls += " new";
         if (spent < req && rk === 0) cls += " locked";
         if (selTalent === id) cls += " sel";
-        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
+        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" title=\"" + esc((t.fr || t.en) + " " + rk + "/" + t.max) + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
       });
     }
     var spentA = 0;
@@ -956,7 +963,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         if (PATH[L] === id) cls += " new";
         if (spentA < reqA && rk === 0) cls += " locked";
         if (selTalent === id) cls += " sel";
-        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
+        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" title=\"" + esc((t.fr || t.en) + " " + rk + "/" + t.max) + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
       });
     }
     $("tree").innerHTML = html;

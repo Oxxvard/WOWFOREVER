@@ -99,6 +99,18 @@ details.card[data-p].on{display:block}
 li.got > details > summary{opacity:.45}
 li.got > details[open] > summary{opacity:.75}
 .cnt{font-family:var(--f-mono); font-size:.76rem; color:var(--muted); margin-left:5px}
+.mdgrid{display:grid; grid-template-columns:minmax(165px,225px) minmax(0,1fr); gap:14px; align-items:start}
+.mdgrid.flat{grid-template-columns:minmax(0,1fr)}
+.mdgrid.flat #lieux{display:none}
+.lieux{list-style:none; margin:0; padding:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel2)}
+.lieux li + li{border-top:1px solid var(--line)}
+.lieux button{width:100%; display:flex; justify-content:space-between; gap:8px; align-items:baseline; background:none; border:0; border-left:3px solid transparent; color:var(--ink); font-family:var(--f-body); font-size:.88rem; text-align:left; padding:8px 10px; cursor:pointer}
+.lieux button:hover{background:var(--panel)}
+.lieux li.now button{border-left-color:var(--ok)}
+.lieux li.sel button{background:var(--panel); color:var(--rogue); font-weight:700; border-left-color:var(--rogue)}
+.lieux .n{flex:0 0 auto; font-family:var(--f-mono); font-size:.74rem; color:var(--muted)}
+.lieux li.sel .n{color:var(--rogue)}
+@media (max-width:760px){ .mdgrid{grid-template-columns:minmax(0,1fr)} }
 .tab[aria-selected="true"] .cnt{color:var(--rogue)}
 @media (max-width:860px){ .grid{grid-template-columns:minmax(0,1fr)} }
 .col{display:flex; flex-direction:column; gap:18px; min-width:0}
@@ -340,7 +352,10 @@ footer{margin-top:22px}
           <button class="chip hchip" type="button" id="hideH" aria-pressed="true">Masquer le territoire Horde</button>
         </div>
         <p class="small" id="icoStatus" style="margin-bottom:8px"></p>
-        <ul class="ilist" id="wbody"></ul>
+        <div class="mdgrid flat" id="mdgrid">
+          <ul class="lieux" id="lieux" aria-label="Lieux"></ul>
+          <ul class="ilist" id="wbody"></ul>
+        </div>
         <details class="fold"><summary>Règles d'armes et d'icônes</summary><p class="small" style="margin-top:10px">Elfe de la nuit : tu démarres avec Dagues et Armes de jet seulement. Pour une épée comme la <span class="fr">Lame de cruauté</span> <span class="en">(Cruel Barb)</span>, apprends la compétence Épées chez Woo Ping à Hurlevent (Stormwind). En Forever, Combat et Finesse utilisent tous les types d'armes, et les voleurs peuvent porter des haches. À partir de Taillader et trancher (niveau 36 dans le parcours) : une masse, dans n'importe quelle main, donne sa pénétration d'armure aux deux mains ; le bonus de critique d'une dague ou d'une arme de poing ne vaut que pour la main qui la tient ; l'attaque supplémentaire d'une épée ou d'une hache part toujours de la main droite. Touche un objet pour voir sa fiche (stats lues sur la base Forever de Wowhead). Icônes redessinées dans le style du jeu, cadre à la couleur de rareté (vert inhabituel, bleu rare) : le lien Wowhead de chaque fiche montre l'icône officielle.</p></details>
       </section>
     </div>
@@ -724,7 +739,8 @@ footer{margin-top:22px}
   }
 
   /* ---------- État ---------- */
-  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true, byLieu = false, hideGot = false, DONE = {};
+  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true, byLieu = false, hideGot = false, DONE = {}, selLieu = null;
+  try { selLieu = localStorage.getItem("voleur-lieu-sel") || null; } catch(e){}
   try { var dd = JSON.parse(localStorage.getItem("voleur-fait") || "{}"); if (dd && typeof dd === "object") DONE = dd; } catch(e){}
   try { if (localStorage.getItem("voleur-masque-fait") === "1") hideGot = true; } catch(e){}
   function chk(k){ return '<button type="button" class="chk' + (DONE[k] ? " on" : "") + '" data-k="' + esc(k) + '" aria-pressed="' + (DONE[k] ? "true" : "false") + '" title="Marquer comme fait"></button>'; }
@@ -847,7 +863,7 @@ footer{margin-top:22px}
     }
     return null;
   }
-  function groupRows(list){
+  function groupsOf(list){
     var G = {}, order = [];
     list.forEach(function(i){
       var k = i.lieu ? i.lieu[1] : (i.zone || "Ailleurs");
@@ -859,13 +875,15 @@ footer{margin-top:22px}
       var sa = ga.dj ? ga.dj.a : ga.items[0].lv, sb = gb.dj ? gb.dj.a : gb.items[0].lv;
       return sa - sb || ga.items[0].lv - gb.items[0].lv;
     });
-    return order.map(function(k){
-      var g = G[k], n = g.items.length, nd = g.items.filter(function(i){ return i.from === "drop"; }).length;
-      var now = g.dj ? (L >= g.dj.a && L <= g.dj.b) : g.items.some(function(i){ return i.lv <= L && i.lv > L - 6; });
-      var meta = (g.dj ? "niv. " + g.dj.a + "–" + g.dj.b + " · " : "") + n + (n > 1 ? " objets" : " objet") + (nd ? " · " + nd + (nd > 1 ? " drops" : " drop") : "");
-      var head = '<li class="ghead' + (now ? " now" : "") + '"><span class="gn">' + (g.lieu ? nmA(g.lieu) : esc(g.zone)) + (g.dj && g.dj.where ? ' <span class="en">' + esc(g.dj.where) + '</span>' : '') + '</span><span class="gm">' + esc(meta) + '</span></li>';
-      return head + g.items.map(itemLi).join("");
-    });
+    return { order: order, G: G };
+  }
+  function groupNow(g){
+    return g.dj ? (L >= g.dj.a && L <= g.dj.b) : g.items.some(function(i){ return i.lv <= L && i.lv > L - 6; });
+  }
+  function gheadHtml(g){
+    var n = g.items.length, nd = g.items.filter(function(i){ return i.from === "drop"; }).length;
+    var meta = (g.dj ? "niv. " + g.dj.a + "–" + g.dj.b + " · " : "") + n + (n > 1 ? " objets" : " objet") + (nd ? " · " + nd + (nd > 1 ? " drops" : " drop") : "");
+    return '<li class="ghead' + (groupNow(g) ? " now" : "") + '"><span class="gn">' + (g.lieu ? nmA(g.lieu) : esc(g.zone)) + (g.dj && g.dj.where ? ' <span class="en">' + esc(g.dj.where) + '</span>' : '') + '</span><span class="gm">' + esc(meta) + '</span></li>';
   }
   function renderItems(){
     ICO.ok = 0; ICO.ko = 0;
@@ -910,7 +928,21 @@ footer{margin-top:22px}
     var nGot = ITEMS.filter(function(i){ return DONE["i:" + i.id]; }).length;
     var tabI = document.querySelector('.tab[data-p="items"] .cnt');
     if (tabI) tabI.textContent = nGot + "/" + ITEMS.length;
-    var rows = byLieu ? groupRows(keep) : keep.map(itemLi);
+    var rows;
+    if (byLieu){
+      var gs = groupsOf(keep);
+      if (gs.order.indexOf(selLieu) < 0) selLieu = gs.order[0] || null;
+      $("lieux").innerHTML = gs.order.map(function(k){
+        var g = gs.G[k];
+        return '<li class="' + (k === selLieu ? "sel " : "") + (groupNow(g) ? "now" : "") + '"><button type="button" data-l="' + esc(k) + '"><span>' + esc(g.lieu ? (g.lieu[0] || g.lieu[1]) : g.zone) + '</span><span class="n">' + g.items.length + '</span></button></li>';
+      }).join("") || '<li style="padding:8px 10px" class="small">Aucun lieu</li>';
+      var sel = selLieu ? gs.G[selLieu] : null;
+      rows = sel ? [gheadHtml(sel)].concat(sel.items.map(itemLi)) : [];
+      $("mdgrid").classList.remove("flat");
+    } else {
+      $("mdgrid").classList.add("flat");
+      rows = keep.map(itemLi);
+    }
     $("wbody").innerHTML = (rows.join("") || '<li style="padding:12px" class="small">Aucun objet dans ce filtre.</li>') + (hidden ? '<li style="padding:10px 12px" class="small">' + hidden + ' objets masqués : donjons et quêtes en territoire Horde (Pins argentés, Les Tarides, Tirisfal). Désactive le filtre pour les voir.</li>' : '');
   }
 
@@ -1004,6 +1036,13 @@ footer{margin-top:22px}
     if (DONE[k]) delete DONE[k]; else DONE[k] = 1;
     try { localStorage.setItem("voleur-fait", JSON.stringify(DONE)); } catch(err){}
     renderNow(); renderItems();
+  });
+  $("lieux").addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest("button[data-l]") : null;
+    if (!b) return;
+    selLieu = b.getAttribute("data-l");
+    try { localStorage.setItem("voleur-lieu-sel", selLieu); } catch(err){}
+    renderItems();
   });
   $("hideGot").addEventListener("click", function(){
     hideGot = !hideGot;

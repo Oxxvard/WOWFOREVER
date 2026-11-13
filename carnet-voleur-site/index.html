@@ -92,6 +92,14 @@ details.card[data-p].on{display:block}
 .fold{margin-top:10px; font-size:.86rem}
 .fold summary{cursor:pointer; color:var(--muted)}
 .card-head .note{font-size:.8rem}
+.chk{flex:0 0 auto; align-self:center; width:17px; height:17px; padding:0; border:1px solid var(--line); border-radius:4px; background:var(--panel2); cursor:pointer; vertical-align:-3px; margin-right:5px}
+.chk:hover{border-color:var(--rogue)}
+.chk.on{background:var(--rogue); border-color:var(--rogue); position:relative}
+.chk.on::after{content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#1a1409; font-size:.8rem; font-weight:700}
+li.got > details > summary{opacity:.45}
+li.got > details[open] > summary{opacity:.75}
+.cnt{font-family:var(--f-mono); font-size:.76rem; color:var(--muted); margin-left:5px}
+.tab[aria-selected="true"] .cnt{color:var(--rogue)}
 @media (max-width:860px){ .grid{grid-template-columns:minmax(0,1fr)} }
 .col{display:flex; flex-direction:column; gap:18px; min-width:0}
 section.card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; min-width:0}
@@ -183,7 +191,7 @@ tr.far{opacity:.5}
 .ilist > li.ok{box-shadow:inset 3px 0 0 var(--ok)}
 .ilist > li.soon{box-shadow:inset 3px 0 0 var(--warn)}
 .ilist > li.far{opacity:.55}
-.ilist details > summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:4px 12px; padding:10px 6px 10px 12px; align-items:center}
+.ilist details > summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:19px 44px minmax(0,1fr) auto; gap:4px 10px; padding:10px 6px 10px 10px; align-items:center}
 .ilist details > summary::-webkit-details-marker{display:none}
 .ilist details > summary:hover{background:var(--panel2)}
 .ico{position:relative; width:44px; height:44px; border-radius:5px; flex:none; display:grid; place-items:center; overflow:hidden;
@@ -297,7 +305,7 @@ footer{margin-top:22px}
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button class="tab" type="button" role="tab" data-p="now" aria-selected="true">Niveau</button>
     <button class="tab" type="button" role="tab" data-p="tree" aria-selected="false">Talents</button>
-    <button class="tab" type="button" role="tab" data-p="items" aria-selected="false">Armes</button>
+    <button class="tab" type="button" role="tab" data-p="items" aria-selected="false">Armes <span class="cnt"></span></button>
     <button class="tab" type="button" role="tab" data-p="route" aria-selected="false">Parcours</button>
     <button class="tab" type="button" role="tab" data-p="thanes" aria-selected="false">Salle des Thanes</button>
   </nav>
@@ -328,6 +336,7 @@ footer{margin-top:22px}
           <button class="chip" type="button" data-f="armor" aria-pressed="false">Armure et bijoux</button>
           <button class="chip" type="button" data-f="drop" aria-pressed="false">À farmer</button>
           <button class="chip hchip" type="button" id="byLieu" aria-pressed="false">Grouper par lieu</button>
+          <button class="chip hchip" type="button" id="hideGot" aria-pressed="false">Masquer ce que j'ai</button>
           <button class="chip hchip" type="button" id="hideH" aria-pressed="true">Masquer le territoire Horde</button>
         </div>
         <p class="small" id="icoStatus" style="margin-bottom:8px"></p>
@@ -486,8 +495,8 @@ footer{margin-top:22px}
     58:[["Sprint","Sprint",1,null,"rank",true],["Coup de pied","Kick",1,null,"rank",false],["Embuscade","Ambush",1,null,"rank",false]],
     60:[["Éviscération","Eviscerate",1,null,"rank",true],["Camouflage","Stealth",1,null,"rank",true],["Attaque sournoise","Backstab",1,"Deux rangs au 60.","rank",false],["Rupture","Rupture",1,null,"rank",false],["Suriner","Gouge",1,null,"rank",false],["Feinte","Feint",1,null,"rank",false],["Estropier","Mutilate",1,"Sort propre à Forever, demande deux dagues.","rank",false],["Marque de mort","Death Mark",1,"Sort propre à Forever.","rank",false]]
   };
-  function spellsHtml(arr){
-    function one(a){ return nm(a[0], a[1], a[2], a[2] !== 1 ? a[3] : null) + ' <span class="small">(' + (a[4] === "new" ? "nouveau" : "rang sup.") + ')</span>'; }
+  function spellsHtml(arr, lv){
+    function one(a){ return (lv ? chk("s:" + lv + ":" + a[1]) : "") + nm(a[0], a[1], a[2], a[2] !== 1 ? a[3] : null) + ' <span class="small">(' + (a[4] === "new" ? "nouveau" : "rang sup.") + ')</span>'; }
     var m = arr.filter(function(a){ return a[5] === true; }), o = arr.filter(function(a){ return a[5] !== true; });
     var out = [];
     if (m.length) out.push('<b>Obligatoire :</b> ' + m.map(one).join(", "));
@@ -513,8 +522,8 @@ footer{margin-top:22px}
     56:[["Poison douloureux IV","Wound Poison IV",1]],
     60:[["Poison instantané VI","Instant Poison VI",1],["Poison mortel V","Deadly Poison V",1]]
   };
-  function listNames(arr){
-    return arr.map(function(a){ return nm(a[0], a[1], a[2], a[3] && a[2] !== 1 ? a[3] : null) + (a[2] === 1 && a[3] ? ' <span class="small">(' + esc(a[3]) + ')</span>' : ""); }).join(", ");
+  function listNames(arr, lv){
+    return arr.map(function(a){ return (lv ? chk("p:" + lv + ":" + a[1]) : "") + nm(a[0], a[1], a[2], a[3] && a[2] !== 1 ? a[3] : null) + (a[2] === 1 && a[3] ? ' <span class="small">(' + esc(a[3]) + ')</span>' : ""); }).join(", ");
   }
 
   /* ---------- Quêtes de classe ---------- */
@@ -715,7 +724,10 @@ footer{margin-top:22px}
   }
 
   /* ---------- État ---------- */
-  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true, byLieu = false;
+  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true, byLieu = false, hideGot = false, DONE = {};
+  try { var dd = JSON.parse(localStorage.getItem("voleur-fait") || "{}"); if (dd && typeof dd === "object") DONE = dd; } catch(e){}
+  try { if (localStorage.getItem("voleur-masque-fait") === "1") hideGot = true; } catch(e){}
+  function chk(k){ return '<button type="button" class="chk' + (DONE[k] ? " on" : "") + '" data-k="' + esc(k) + '" aria-pressed="' + (DONE[k] ? "true" : "false") + '" title="Marquer comme fait"></button>'; }
   try { if (localStorage.getItem("voleur-lieu") === "1") byLieu = true; } catch(e){}
   try { if (localStorage.getItem("voleur-horde") === "0") hideH = false; } catch(e){}
   try { var s = parseInt(localStorage.getItem("voleur-lvl"), 10); if (s >= MIN && s <= MAX) L = s; } catch(e){}
@@ -746,12 +758,12 @@ footer{margin-top:22px}
       items.push(["Talent", "Place ton point dans <span class=\"talent-pill\">" + (t.fr ? esc(t.fr) : esc(t.en)) + " <span class=\"en\">(" + esc(t.en) + ")</span></span> <span class=\"mono small\">" + r[tid] + "/" + t.max + "</span>" + (t.fr ? "" : " <span class=\"nofr\">nom FR non traduit en jeu</span>")]);
     }
     if (L > 40) items.push(["Après le 40", "Armes : rien entre 40 et 50. <span class=\"small\">Le reste va jusqu'au 60.</span>"]);
-    if (SPELLS[L]) items.push(["Maître voleur", spellsHtml(SPELLS[L])]);
+    if (SPELLS[L]) items.push(["Maître voleur", spellsHtml(SPELLS[L], L)]);
     else items.push(["Maître voleur", "<span class=\"small\">Rien : les rangs tombent aux niveaux pairs.</span>"]);
-    if (L === 17) items.push(["Rappel", "Vérifie que tu as appris au 16 : " + spellsHtml(SPELLS[16])]);
+    if (L === 17) items.push(["Rappel", "Vérifie que tu as appris au 16 : " + spellsHtml(SPELLS[16], 16)]);
     if (L === 17) items.push(["Ton arbre", "Au 17, le parcours Wowhead donne : Attaques optimisées 2/2, Attaques impitoyables 2/2 (arbre Assassinat), Achèvement 3/3, Précision 1/3. Si tu as suivi l'ancien parcours du carnet (Précision 3/3, pas d'Attaques impitoyables), pas besoin de réinitialiser maintenant : fais-le au 20 (voir le conseil du niveau 20)."]);
     if (L === 20) items.push(["Conseil", "Option du guide Wowhead : réinitialise tes talents chez le maître des voleurs pour prendre " + nm("Riposte","Riposte",1) + " tout de suite (Attaques optimisées 2, Achèvement 3, Précision 2, Déviation 3, Riposte 1), puis remets 2 points dans " + nm("Attaques impitoyables","Remorseless Attacks",1) + " aux niveaux 21 et 22. L'arbre ci-dessous garde l'ordre simple, sans réinitialisation."]);
-    if (POISONS[L]) items.push(["Poisons", listNames(POISONS[L]) + (L > 20 ? " <span class=\"small\">(chez le maître voleur, composants chez Kyrai à Darnassus)</span>" : "")]);
+    if (POISONS[L]) items.push(["Poisons", listNames(POISONS[L], L) + (L > 20 ? " <span class=\"small\">(chez le maître voleur, composants chez Kyrai à Darnassus)</span>" : "")]);
     var cq = CLASSQ.filter(function(q){ return L >= q.from && L <= q.to; });
     cq.forEach(function(q){ items.push([q.key === L ? "Quête de classe" : "Quête de classe en cours", q.html]); });
     var z = ROUTE.filter(function(s){ return L >= s.a && L <= s.b; });
@@ -825,7 +837,8 @@ footer{margin-top:22px}
   function stateOf(it){ return it.lv <= L ? "ok" : (it.lv <= L + 4 ? "soon" : "far"); }
   function itemLi(i){
     var st = stateOf(i), lab = st === "ok" ? "Équipable" : (st === "soon" ? "Bientôt" : "Plus tard");
-    return '<li class="' + st + '"><details><summary>' + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p>' + srcLine(i) + '</div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + lab + '</span></div></summary>' + tooltip(i) + '</details></li>';
+    var got = !!DONE["i:" + i.id];
+    return '<li class="' + st + (got ? " got" : "") + '"><details><summary>' + chk("i:" + i.id) + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p>' + srcLine(i) + '</div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + (got ? "Obtenu" : lab) + '</span></div></summary>' + tooltip(i) + '</details></li>';
   }
   function djOf(en){
     if (!en) return null;
@@ -856,7 +869,7 @@ footer{margin-top:22px}
   }
   function renderItems(){
     ICO.ok = 0; ICO.ko = 0;
-    var BASE = ITEMS.filter(function(i){ return !(hideH && i.terr); });
+    var BASE = ITEMS.filter(function(i){ return !(hideH && i.terr) && !(hideGot && DONE["i:" + i.id]); });
     var hidden = ITEMS.length - BASE.length;
     $("hideH").setAttribute("aria-pressed", hideH ? "true" : "false");
     var melee = BASE.filter(function(i){ return i.cat === "melee" && i.dps && !i.caster; });
@@ -893,6 +906,10 @@ footer{margin-top:22px}
         return i.cat === filter;
       }).slice().sort(function(a,b){ return a.lv - b.lv; });
     $("byLieu").setAttribute("aria-pressed", byLieu ? "true" : "false");
+    $("hideGot").setAttribute("aria-pressed", hideGot ? "true" : "false");
+    var nGot = ITEMS.filter(function(i){ return DONE["i:" + i.id]; }).length;
+    var tabI = document.querySelector('.tab[data-p="items"] .cnt');
+    if (tabI) tabI.textContent = nGot + "/" + ITEMS.length;
     var rows = byLieu ? groupRows(keep) : keep.map(itemLi);
     $("wbody").innerHTML = (rows.join("") || '<li style="padding:12px" class="small">Aucun objet dans ce filtre.</li>') + (hidden ? '<li style="padding:10px 12px" class="small">' + hidden + ' objets masqués : donjons et quêtes en territoire Horde (Pins argentés, Les Tarides, Tirisfal). Désactive le filtre pour les voir.</li>' : '');
   }
@@ -979,6 +996,20 @@ footer{margin-top:22px}
     show(start);
   })();
 
+  document.addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest(".chk") : null;
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var k = b.getAttribute("data-k");
+    if (DONE[k]) delete DONE[k]; else DONE[k] = 1;
+    try { localStorage.setItem("voleur-fait", JSON.stringify(DONE)); } catch(err){}
+    renderNow(); renderItems();
+  });
+  $("hideGot").addEventListener("click", function(){
+    hideGot = !hideGot;
+    try { localStorage.setItem("voleur-masque-fait", hideGot ? "1" : "0"); } catch(e){}
+    renderItems();
+  });
   $("byLieu").addEventListener("click", function(){
     byLieu = !byLieu;
     try { localStorage.setItem("voleur-lieu", byLieu ? "1" : "0"); } catch(e){}

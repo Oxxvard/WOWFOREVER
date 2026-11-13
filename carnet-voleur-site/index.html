@@ -349,10 +349,16 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .more{display:block; margin-top:4px; background:none; border:0; padding:0; color:var(--muted); font-family:var(--f-body); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer}
 .more:hover{color:var(--accent)}
 
-/* Arbre de talents : panneau étroit et haut, comme en jeu. Une case = une icône. */
-.tree{grid-template-columns:32px repeat(4, 56px); gap:6px; justify-content:start}
+/* Arbre de talents : trois colonnes côte à côte, comme en jeu et sur Wowhead. */
+.tree{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px; align-items:start; overflow:visible}
+.tpanel{min-width:0}
+.thead{display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding-bottom:7px; margin-bottom:9px; border-bottom:1px solid var(--line-strong)}
+.tname{font-size:.76rem; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.tpts{font-family:var(--f-mono); font-size:1rem; color:var(--rogue)}
+.tgrid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:5px}
+@media (max-width:820px){ .tree{grid-template-columns:minmax(0,1fr); gap:26px} }
 .node{position:relative; aspect-ratio:1/1; min-height:0; padding:0; display:flex; align-items:center; justify-content:center; border-radius:6px}
-.node .ti{display:block; margin:0; width:40px; height:40px; border-radius:4px; border:1px solid rgba(0,0,0,.6); filter:grayscale(1) brightness(.5)}
+.node .ti{display:block; margin:0; width:82%; max-width:44px; height:auto; aspect-ratio:1/1; border-radius:4px; border:1px solid rgba(0,0,0,.6); filter:grayscale(1) brightness(.5)}
 .node.has .ti, .node.full .ti{filter:none}
 .node .nfr{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%)}
 .node .nr{position:absolute; right:2px; bottom:1px; margin:0; font-family:var(--f-mono); font-size:.66rem; line-height:1.4; padding:0 3px;
@@ -434,8 +440,8 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       </section>
 
       <section class="card" data-p="tree">
-        <div class="card-head"><h2>Arbre Combat</h2><span class="note" id="treeNote"></span></div>
-        <div class="tree" id="tree" role="group" aria-label="Arbre de talents Combat"></div>
+        <div class="card-head"><h2>Arbres de talents</h2><span class="note" id="treeNote"></span></div>
+        <div class="tree" id="tree" role="group" aria-label="Arbres de talents"></div>
         <div class="tdetail" id="tdetail"><p class="small">Touche un talent pour voir son effet et à quels niveaux le parcours le prend.</p></div>
         <p class="small" style="margin-top:10px">Parcours niveau par niveau du guide de leveling Combat de Wowhead (warstry, relu par Simonize, mis à jour le 6 novembre 2026). Un point par niveau dès le 10, chaque rang exige 5 points de plus dans l'arbre Combat. La dernière ligne (Assa.) montre les 2 points pris dans l'arbre Assassinat. Les builds « donjon et raid » de Wowhead sont signalés par le site lui-même comme cassés depuis la refonte des arbres : ne les suis pas.</p>
       </section>
@@ -559,6 +565,24 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     {id:"hns", ic:"inv_sword_27",  tier:5, fr:"Taillader et trancher", en:"Hack and Slash", max:5, eff:"Bonus selon l'arme : attaque supplémentaire (épée, hache), critique (dague, poing), armure ignorée (masse)."},
     {id:"fos", ic:"ability_rogue_restlessblades",  tier:6, fr:null, en:"Flash of Steel", max:5, eff:"Surin (Shank) rend plus d'énergie et son temps de recharge baisse.", note:"Pas encore traduit dans le client selon ForeverChanges. Kami Labs l'appelle « Éclair d'acier »."},
     {id:"ar", ic:"spell_shadow_shadowworddominate",   tier:7, fr:"Poussée d'adrénaline", en:"Adrenaline Rush", max:1, eff:"+100 % de régénération d'énergie pendant 15 s."},
+    {id:"setu", ic:"spell_nature_mirrorimage", tier:1, tree:"fine", fr:"Préparatifs", en:"Setup", max:3, eff:"Chances d'ajouter un point de combo après avoir esquivé une attaque."},
+    {id:"mdec", ic:"spell_shadow_charm", tier:1, tree:"fine", fr:"Maître des illusions", en:"Master of Deception", max:3, eff:"Réduit les chances de tes adversaires de te détecter en camouflage."},
+    {id:"oppo", ic:"ability_warrior_warcry", tier:1, tree:"fine", fr:"Opportunité", en:"Opportunity", max:5, eff:"+10 % de dégâts d'Attaque sournoise, Garrot et Embuscade au rang 5."},
+    {id:"ddee", ic:"spell_shadow_summonsuccubus", tier:2, tree:"fine", fr:"Coups fourrés", en:"Dirty Deeds", max:2, eff:"Coup bas et Garrot coûtent 20 points d'énergie de moins."},
+    {id:"camo", ic:"ability_stealth", tier:2, tree:"fine", fr:"Dissimulation", en:"Camouflage", max:3, eff:"Réduit de 15 % la pénalité de vitesse du Camouflage."},
+    {id:"iamb", ic:"ability_rogue_ambush", tier:2, tree:"fine", fr:"Embuscade améliorée", en:"Improved Ambush", max:3, eff:"+45 % de chances de coup critique sur Embuscade au rang 3."},
+    {id:"dtri", ic:"ability_sap", tier:2, tree:"fine", fr:"Coup tordu", en:"Dirty Tricks", max:2, eff:"Assommer et Cécité coûtent 50 % d'énergie en moins."},
+    {id:"init", ic:"spell_shadow_fumble", tier:3, tree:"fine", fr:"Initiative", en:"Initiative", max:3, eff:"Chances de gagner un point de combo supplémentaire en ouvrant."},
+    {id:"prem", ic:"spell_shadow_possession", tier:3, tree:"fine", fr:"Préméditation", en:"Premeditation", max:1, eff:"Confère 2 points de combo à la cible. Niveau 20."},
+    {id:"serr", ic:"inv_sword_17", tier:3, tree:"fine", fr:"Lames dentelées", en:"Serrated Blades", max:3, eff:"Tes attaques ignorent 9 % de l'armure, et Rupture gagne 30 % de dégâts."},
+    {id:"elus", ic:"spell_magic_lesserinvisibilty", tier:4, tree:"fine", fr:"Insaisissable", en:"Elusiveness", max:2, eff:"Réduit le temps de recharge de Disparition et Cécité de 90 s."},
+    {id:"ghos", ic:"spell_shadow_curse", tier:4, tree:"fine", fr:"Frappe fantomatique", en:"Ghostly Strike", max:1, eff:"Une attaque qui inflige 125 % des dégâts de l'arme."},
+    {id:"qget", ic:"ability_rogue_blackjack", tier:4, tree:"fine", fr:"Fuite rapide", en:"Quick Getaway", max:2, eff:"+1 cible assommable et +35 % de vitesse."},
+    {id:"hsen", ic:"ability_ambush", tier:5, tree:"fine", fr:"Sens amplifiés", en:"Heightened Senses", max:2, eff:"Détection du camouflage comme si tu avais 3 niveaux de plus."},
+    {id:"prep", ic:"spell_shadow_antishadow", tier:5, tree:"fine", fr:"Préparation", en:"Preparation", max:1, eff:"Annule le temps de recharge de tes autres techniques."},
+    {id:"hemo", ic:"spell_shadow_lifedrain", tier:5, tree:"fine", fr:"Hémorragie", en:"Hemorrhage", max:1, eff:"Frappe instantanée à 100 % des dégâts de l'arme. Niveau 30."},
+    {id:"bknf", ic:"inv_sword_32", tier:6, tree:"fine", fr:null, en:"Boot Knife", max:5, eff:"Surin a 100 % de chances d'ajouter 2 points de combo.", note:"Pas encore traduit dans le client."},
+    {id:"dmrk", ic:"ability_creature_cursed_02", tier:7, tree:"fine", fr:"Marque de mort", en:"Death Mark", max:1, eff:"Un coup de grâce qui marque la cible. Niveau 40."},
     {id:"sgou", ic:"ability_gouge", tier:1, tree:"assa", fr:"Suriner amélioré", en:"Improved Gouge", max:3, eff:"Augmente la durée de Suriner de 2 s au rang 3."},
     {id:"iexp", ic:"ability_warrior_riposte", tier:2, tree:"assa", fr:"Exposer l'armure amélioré", en:"Improved Expose Armor", max:2, eff:"Exposer l'armure coûte 10 points d'énergie de moins et en rend 2 avec 5 points de combo."},
     {id:"isad", ic:"ability_rogue_slicedice", tier:2, tree:"assa", fr:"Débiter amélioré", en:"Improved Slice and Dice", max:3, eff:"Augmente la durée de Débiter de 15 % au rang 3."},
@@ -581,6 +605,8 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
   /* Placement dans la grille (colonne 1 à 4) */
   var LAYOUT = {1:["coup","effi","refl",null], 2:["punc","defl","prec","ispr"], 3:["endu","ripo",null,"comp"], 4:["ikic","flaw","wexp","aggr"], 5:["dws","bf","hns",null], 6:[null,null,"fos",null], 7:[null,"ar",null,null]};
   /* Arbre Assassinat : seules les rangées où le parcours place des points */
+  var LAYOUT_F = {1:["setu","mdec","oppo",null], 2:["ddee","camo","iamb","dtri"], 3:["init","prem","serr",null],
+                  4:["elus","ghos",null,"qget"], 5:["hsen","prep","hemo",null], 6:[null,null,"bknf",null], 7:[null,"dmrk",null,null]};
   var LAYOUT_A = {1:["sgou","rema","mali",null], 2:["neme","iexp",null,"isad"], 3:["vigu","bspl","mort",null],
                   4:["vilp","cbld","ipoi",null], 5:["rstr","veno","ikid",null], 6:[null,null,"sfat",null], 7:[null,"muti",null,null]};
   var PATH = {10:"effi",11:"effi",12:"rema",13:"rema",14:"coup",15:"coup",16:"coup",17:"prec",18:"prec",19:"defl",20:"defl",21:"defl",22:"ripo",23:"comp",24:"comp",25:"prec",26:"endu",27:"wexp",28:"wexp",29:"aggr",30:"aggr",31:"aggr",32:"bf",33:"dws",34:"dws",35:"flaw",36:"hns",37:"fos",38:"fos",39:"fos",40:"fos",
@@ -931,41 +957,36 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     if (!t.ic) return "";
     return '<img class="ti" src="https://wow.zamimg.com/images/wow/icons/medium/' + t.ic + '.jpg" alt="" loading="lazy" width="30" height="30">';
   }
+  var TREES = [
+    { key:"assa", nom:"Assassinat", lay:function(){ return LAYOUT_A; } },
+    { key:"comb", nom:"Combat",     lay:function(){ return LAYOUT; } },
+    { key:"fine", nom:"Finesse",    lay:function(){ return LAYOUT_F; } }
+  ];
+  function treeOf(t){ return t.tree || "comb"; }
   function renderTree(){
-    var r = ranksAt(L), html = "", spent = 0;
-    T.forEach(function(t){ if (t.tree !== "assa") spent += r[t.id]; });
-    if (PATH[L] && !TBY[PATH[L]].tree) spent -= 1;
-    for (var tier = 1; tier <= 7; tier++){
-      var req = (tier - 1) * 5;
-      html += "<div class=\"tier-lab\">R" + tier + "<br>" + req + " pts</div>";
-      LAYOUT[tier].forEach(function(id){
-        if (!id){ html += "<div class=\"node empty\" aria-hidden=\"true\"></div>"; return; }
-        var t = TBY[id], rk = r[id], cls = "node";
-        if (rk > 0) cls += " has";
-        if (rk >= t.max) cls += " full";
-        if (PATH[L] === id) cls += " new";
-        if (spent < req && rk === 0) cls += " locked";
-        if (selTalent === id) cls += " sel";
-        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" title=\"" + esc((t.fr || t.en) + " " + rk + "/" + t.max) + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
-      });
-    }
-    var spentA = 0;
-    T.forEach(function(t){ if (t.tree === "assa") spentA += r[t.id]; });
-    if (PATH[L] && TBY[PATH[L]].tree === "assa") spentA -= 1;
-    for (var ta = 1; ta <= 7; ta++){
-      var reqA = (ta - 1) * 5;
-      html += "<div class=\"tier-lab\">Assa.<br>" + reqA + " pts</div>";
-      LAYOUT_A[ta].forEach(function(id){
-        if (!id){ html += "<div class=\"node empty\" aria-hidden=\"true\"></div>"; return; }
-        var t = TBY[id], rk = r[id], cls = "node";
-        if (rk > 0) cls += " has";
-        if (rk >= t.max) cls += " full";
-        if (PATH[L] === id) cls += " new";
-        if (spentA < reqA && rk === 0) cls += " locked";
-        if (selTalent === id) cls += " sel";
-        html += "<button type=\"button\" class=\"" + cls + "\" data-t=\"" + id + "\" title=\"" + esc((t.fr || t.en) + " " + rk + "/" + t.max) + "\" aria-label=\"" + esc((t.fr || t.en) + " " + rk + " sur " + t.max) + "\">" + tIcon(t) + "<span class=\"nfr\">" + esc(t.fr || t.en) + "</span><span class=\"nr\">" + rk + "/" + t.max + "</span></button>";
-      });
-    }
+    var r = ranksAt(L);
+    var html = TREES.map(function(tr){
+      var spent = 0;
+      T.forEach(function(t){ if (treeOf(t) === tr.key) spent += r[t.id]; });
+      var posePlaceeIci = PATH[L] && treeOf(TBY[PATH[L]]) === tr.key;
+      var avant = spent - (posePlaceeIci ? 1 : 0);
+      var lay = tr.lay(), cells = "";
+      for (var tier = 1; tier <= 7; tier++){
+        var req = (tier - 1) * 5;
+        (lay[tier] || [null,null,null,null]).forEach(function(id){
+          if (!id){ cells += '<div class="node empty" aria-hidden="true"></div>'; return; }
+          var t = TBY[id], rk = r[id], cls = "node";
+          if (rk > 0) cls += " has";
+          if (rk >= t.max) cls += " full";
+          if (PATH[L] === id) cls += " new";
+          if (avant < req && rk === 0) cls += " locked";
+          if (selTalent === id) cls += " sel";
+          var nom = t.fr || t.en;
+          cells += '<button type="button" class="' + cls + '" data-t="' + id + '" title="' + esc(nom + " " + rk + "/" + t.max + (avant < req && rk === 0 ? " · demande " + req + " points" : "")) + '" aria-label="' + esc(nom + " " + rk + " sur " + t.max) + '">' + tIcon(t) + '<span class="nfr">' + esc(nom) + '</span><span class="nr">' + rk + "/" + t.max + '</span></button>';
+        });
+      }
+      return '<div class="tpanel"><div class="thead"><span class="tname">' + tr.nom + '</span><span class="tpts">' + spent + '</span></div><div class="tgrid">' + cells + '</div></div>';
+    }).join("");
     $("tree").innerHTML = html;
     $("treeNote").textContent = "Point du niveau " + L + " en jaune";
     renderTDetail();

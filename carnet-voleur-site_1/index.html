@@ -187,6 +187,12 @@ tr.far{opacity:.5}
 .isrc b{font-family:var(--f-mono); font-variant-numeric:tabular-nums; color:var(--ok); font-weight:700; margin-right:4px}
 .isrc b.tbc{color:var(--warn)}
 .isrc .lbl{text-transform:uppercase; letter-spacing:.05em; font-size:.72rem; font-weight:700; color:var(--muted)}
+.ghead{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; padding:9px 12px; background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line)}
+.ghead:first-child{border-top:0}
+.ghead .gn{font-weight:700}
+.ghead .gm{font-size:.8rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.ghead.now{box-shadow:inset 3px 0 0 var(--ok)}
+.ghead.now .gm{color:var(--ok)}
 .idps{font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; font-size:1rem}
 .idps small{display:block; font-family:var(--f-body); font-size:.72rem; color:var(--muted)}
 .tip{margin:0 10px 12px 68px; padding:12px 14px; border-radius:8px; background:#141720; color:#e6e7ee; font-size:.9rem; display:flex; flex-direction:column; gap:3px; max-width:440px}
@@ -295,6 +301,7 @@ footer{margin-top:22px}
           <button class="chip" type="button" data-f="sword" aria-pressed="false">Épées 1M</button>
           <button class="chip" type="button" data-f="armor" aria-pressed="false">Armure et bijoux</button>
           <button class="chip" type="button" data-f="drop" aria-pressed="false">À farmer</button>
+          <button class="chip hchip" type="button" id="byLieu" aria-pressed="false">Grouper par lieu</button>
           <button class="chip hchip" type="button" id="hideH" aria-pressed="true">Masquer le territoire Horde</button>
         </div>
         <p class="small" id="icoStatus" style="margin-bottom:8px"></p>
@@ -622,7 +629,8 @@ footer{margin-top:22px}
   }
 
   /* ---------- État ---------- */
-  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true;
+  var L = MIN, filter = "all", selTalent = null, doneQ = {}, hideH = true, byLieu = false;
+  try { if (localStorage.getItem("voleur-lieu") === "1") byLieu = true; } catch(e){}
   try { if (localStorage.getItem("voleur-horde") === "0") hideH = false; } catch(e){}
   try { var s = parseInt(localStorage.getItem("voleur-lvl"), 10); if (s >= MIN && s <= MAX) L = s; } catch(e){}
   try { var dq = JSON.parse(localStorage.getItem("voleur-thanes") || "{}"); if (dq && typeof dq === "object") doneQ = dq; } catch(e){}
@@ -715,6 +723,37 @@ footer{margin-top:22px}
 
   /* ---------- Rendu : objets ---------- */
   function stateOf(it){ return it.lv <= L ? "ok" : (it.lv <= L + 4 ? "soon" : "far"); }
+  function itemLi(i){
+    var st = stateOf(i), lab = st === "ok" ? "Équipable" : (st === "soon" ? "Bientôt" : "Plus tard");
+    return '<li class="' + st + '"><details><summary>' + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p>' + srcLine(i) + '</div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + lab + '</span></div></summary>' + tooltip(i) + '</details></li>';
+  }
+  function djOf(en){
+    if (!en) return null;
+    for (var k = 0; k < DJ.length; k++){
+      if (DJ[k].en === en || DJ[k].en.indexOf(en + ":") === 0 || en.indexOf(DJ[k].en) === 0) return DJ[k];
+    }
+    return null;
+  }
+  function groupRows(list){
+    var G = {}, order = [];
+    list.forEach(function(i){
+      var k = i.lieu ? i.lieu[1] : (i.zone || "Ailleurs");
+      if (!G[k]){ G[k] = { items: [], lieu: i.lieu, zone: i.lieu ? null : i.zone, dj: i.lieu ? djOf(i.lieu[1]) : null }; order.push(k); }
+      G[k].items.push(i);
+    });
+    order.sort(function(a, b){
+      var ga = G[a], gb = G[b];
+      var sa = ga.dj ? ga.dj.a : ga.items[0].lv, sb = gb.dj ? gb.dj.a : gb.items[0].lv;
+      return sa - sb || ga.items[0].lv - gb.items[0].lv;
+    });
+    return order.map(function(k){
+      var g = G[k], n = g.items.length, nd = g.items.filter(function(i){ return i.from === "drop"; }).length;
+      var now = g.dj ? (L >= g.dj.a && L <= g.dj.b) : g.items.some(function(i){ return i.lv <= L && i.lv > L - 6; });
+      var meta = (g.dj ? "niv. " + g.dj.a + "–" + g.dj.b + " · " : "") + n + (n > 1 ? " objets" : " objet") + (nd ? " · " + nd + (nd > 1 ? " drops" : " drop") : "");
+      var head = '<li class="ghead' + (now ? " now" : "") + '"><span class="gn">' + (g.lieu ? nmA(g.lieu) : esc(g.zone)) + (g.dj && g.dj.where ? ' <span class="en">' + esc(g.dj.where) + '</span>' : '') + '</span><span class="gm">' + esc(meta) + '</span></li>';
+      return head + g.items.map(itemLi).join("");
+    });
+  }
   function renderItems(){
     ICO.ok = 0; ICO.ko = 0;
     var BASE = ITEMS.filter(function(i){ return !(hideH && i.terr); });
@@ -747,17 +786,14 @@ footer{margin-top:22px}
     if (!b) b = '<div class="bestbox"><span class="tag">Arme</span><p class="small">Aucune arme accessible dans la liste à ce niveau.</p></div>';
     $("best").innerHTML = b;
 
-    var rows = BASE.filter(function(i){
+    var keep = BASE.filter(function(i){
         if (filter === "all") return true;
         if (filter === "sword") return i.kind === "sword";
         if (filter === "drop") return i.from === "drop";
         return i.cat === filter;
-      })
-      .slice().sort(function(a,b){ return a.lv - b.lv; })
-      .map(function(i){
-        var st = stateOf(i), lab = st === "ok" ? "Équipable" : (st === "soon" ? "Bientôt" : "Plus tard");
-        return '<li class="' + st + '"><details><summary>' + icon(i) + '<div style="min-width:0"><div>' + (i.star ? '★ ' : '') + qname(i) + (i.caster ? '<span class="warnchip">lanceur</span>' : '') + (i.terr ? '<span class="warnchip">territoire Horde</span>' : '') + '</div><p class="imeta">' + esc(i.slot) + ' · niv. ' + i.lv + (i.lvNote ? ' (' + esc(i.lvNote) + ')' : '') + '</p>' + srcLine(i) + '</div><div class="idps">' + (i.dps ? fmt(i.dps) + '<small>DPS</small>' : (i.armor ? i.armor + '<small>armure</small>' : '')) + '<span class="state ' + st + '">' + lab + '</span></div></summary>' + tooltip(i) + '</details></li>';
-      });
+      }).slice().sort(function(a,b){ return a.lv - b.lv; });
+    $("byLieu").setAttribute("aria-pressed", byLieu ? "true" : "false");
+    var rows = byLieu ? groupRows(keep) : keep.map(itemLi);
     $("wbody").innerHTML = (rows.join("") || '<li style="padding:12px" class="small">Aucun objet dans ce filtre.</li>') + (hidden ? '<li style="padding:10px 12px" class="small">' + hidden + ' objets masqués : donjons et quêtes en territoire Horde (Pins argentés, Les Tarides, Tirisfal). Désactive le filtre pour les voir.</li>' : '');
   }
 
@@ -827,6 +863,11 @@ footer{margin-top:22px}
     hideH = !hideH;
     try { localStorage.setItem("voleur-horde", hideH ? "1" : "0"); } catch(e){}
     render();
+  });
+  $("byLieu").addEventListener("click", function(){
+    byLieu = !byLieu;
+    try { localStorage.setItem("voleur-lieu", byLieu ? "1" : "0"); } catch(e){}
+    renderItems();
   });
   Array.prototype.forEach.call(document.querySelectorAll(".chip[data-f]"), function(c){
     c.addEventListener("click", function(){

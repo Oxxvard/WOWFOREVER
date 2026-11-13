@@ -380,6 +380,17 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .pcarac dd{margin:0; font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; color:var(--ink)}
 .pcarac dd.fort{color:var(--rogue); font-weight:700}
 
+/* Conseils : une liste de constats, chacun avec son niveau d'urgence. */
+.cons{list-style:none; margin:0; padding:0}
+.cons li{padding:10px 0 10px 13px; border-left:2px solid var(--line-strong); border-bottom:1px solid var(--line)}
+.cons li.chaud{border-left-color:var(--warn)}
+.cons li.bon{border-left-color:var(--ok)}
+.cons .ct{display:block; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:3px}
+.cons li.chaud .ct{color:var(--warn)}
+.cons li.bon .ct{color:var(--ok)}
+.cons p{margin:0}
+.cons .d{margin-top:5px; font-size:.88rem; color:var(--muted)}
+
 /* Le conseil sur les deux mains. */
 #persoMains{margin:0 0 12px; padding:9px 12px; border-left:2px solid var(--line-strong); font-size:.9rem; color:var(--muted)}
 #persoMains:empty{display:none}
@@ -470,6 +481,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     <button class="tab" type="button" role="tab" data-p="tree" aria-selected="false">Talents</button>
     <button class="tab" type="button" role="tab" data-p="items" aria-selected="false">Armes <span class="cnt"></span></button>
     <button class="tab" type="button" role="tab" data-p="perso" aria-selected="false">Mon perso</button>
+          <button class="tab" type="button" role="tab" data-p="conseils" aria-selected="false">Conseils</button>
           <button class="tab" type="button" role="tab" data-p="route" aria-selected="false">Parcours</button>
     <button class="tab" type="button" role="tab" data-p="thanes" aria-selected="false" id="tabThanes">Salle des Thanes</button>
   </nav>
@@ -549,6 +561,15 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
           <div><p id="persoMains"></p><ul class="slots" id="persoStuff"></ul></div>
         </div>
         <p class="small" id="persoErr" style="margin-top:10px"></p>
+      </section>
+
+      <section class="card" data-p="conseils">
+        <div class="card-head"><h2>Conseils</h2><span class="note">calculés sur ton perso, pas des généralités</span></div>
+        <div id="conseils"></div>
+        <div class="card-head" style="margin-top:22px"><h2>Où je suis</h2><span class="note">ce que le carnet sait de la zone</span></div>
+        <p><label class="small" for="zoneSel">Zone </label>
+          <select id="zoneSel" class="chip" style="padding:5px 9px"></select></p>
+        <div id="zoneInfo"></div>
       </section>
 
       <section class="card" data-p="route">
@@ -1046,7 +1067,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       .then(function(d){
         persoEnCours = false;
         if (d && d.erreur){ $("persoErr").textContent = "L'armurerie n'a rien renvoyé : " + d.erreur; $("persoNote").textContent = "échec"; return; }
-        persoLu = d; $("persoErr").textContent = ""; renderPerso();
+        persoLu = d; $("persoErr").textContent = ""; renderPerso(); renderConseils(); renderZone();
       })
       .catch(function(){
         persoEnCours = false;
@@ -1057,6 +1078,131 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         var rb = $("persoRetry");
         if (rb) rb.addEventListener("click", function(){ persoLu = null; chargerPerso(); });
       });
+  }
+
+  /* ---------- Conseils ---------- */
+  function cl(x){ return (x || "").toString().toLowerCase(); }
+  var METIERS_FR = { "leatherworking":["Travail du cuir",1], "mining":["Minage",1], "skinning":["Dépeçage",1],
+    "herbalism":["Herboristerie",1], "alchemy":["Alchimie",1], "blacksmithing":["Forge",1], "enchanting":["Enchantement",1],
+    "engineering":["Ingénierie",1], "tailoring":["Couture",1], "cooking":["Cuisine",1], "fishing":["Pêche",1],
+    "first aid":["Secourisme",1] };
+  function metierNom(en){
+    var m = METIERS_FR[cl(en)];
+    return m ? nm(m[0], en, 1) : esc(en || "");
+  }
+  function talentParNom(nom){
+    var n = cl(nom);
+    for (var i = 0; i < T.length; i++){ if (cl(T[i].fr) === n || cl(T[i].en) === n) return T[i]; }
+    return null;
+  }
+  function renderConseils(){
+    var out = [], p = persoLu;
+    if (!p){
+      $("conseils").innerHTML = '<p class="small">Ouvre l\'onglet Mon perso une fois pour que je lise ton personnage.</p>';
+      return;
+    }
+    var lv = p.niveau || L;
+
+    /* 1. Points de talent : ce que tu as contre ce que le parcours prévoit. */
+    var attendus = ranksAt(lv), reels = {}, totalReel = 0;
+    (p.arbres || []).forEach(function(a){
+      totalReel += a.points || 0;
+      (a.talents || []).forEach(function(t){
+        var tt = talentParNom(t.nom);
+        if (tt) reels[tt.id] = t.rang || 0;
+      });
+    });
+    var dus = lv - 9;
+    if (totalReel < dus){
+      out.push(["chaud", "Points de talent", "<b>" + (dus - totalReel) + " point" + (dus - totalReel > 1 ? "s" : "") + " de talent non dépensé" + (dus - totalReel > 1 ? "s" : "") + ".</b>",
+        "Tu en as placé " + totalReel + " sur " + dus + " au niveau " + lv + "."]);
+    }
+    var ecarts = [];
+    T.forEach(function(t){
+      var a = attendus[t.id] || 0, r = reels[t.id] || 0;
+      if (a !== r) ecarts.push({ t: t, a: a, r: r });
+    });
+    if (ecarts.length){
+      out.push(["", "Parcours de talents", "Ton arbre s'écarte du parcours sur " + ecarts.length + " talent" + (ecarts.length > 1 ? "s" : "") + ".",
+        ecarts.map(function(e){
+          return nm(e.t.fr, e.t.en, 1) + " <span class=\"mono\">" + e.r + "/" + e.a + "</span>";
+        }).join(" · ") + ' <span class="small">(porté / prévu par le parcours)</span>']);
+    } else {
+      out.push(["bon", "Parcours de talents", "Ton arbre suit exactement le parcours.", ""]);
+    }
+
+    /* 2. Emplacements vides. */
+    var vides = SLOTS.filter(function(sl){ return !(p.stuff || {})[sl[0]]; }).map(function(sl){ return sl[1]; });
+    if (vides.length) out.push(["chaud", "Emplacements vides", "<b>" + vides.join(", ") + "</b> : rien d'équipé.", "Même une pièce verte vaut mieux que rien."]);
+
+    /* 3. Ce que le carnet conseille et que tu n'as pas. */
+    var manquants = [];
+    var porte = {};
+    Object.keys(p.stuff || {}).forEach(function(k){ if (p.stuff[k] && p.stuff[k].id) porte[p.stuff[k].id] = 1; });
+    var vus = {};
+    SLOTS.forEach(function(sl){
+      if (!sl[2]) return;
+      var best = ITEMS.filter(function(i){ return sl[2](i) && i.lv <= lv && !(hideH && i.terr) && !vus[i.id]; })
+                      .sort(function(a, b){ return (b.dps || b.armor || 0) - (a.dps || a.armor || 0); })[0];
+      if (best && !porte[best.id]){ vus[best.id] = 1; manquants.push(best); }
+    });
+    if (manquants.length){
+      out.push(["", "À aller chercher", manquants.length + " objet" + (manquants.length > 1 ? "s" : "") + " du carnet te manquent, accessibles dès maintenant.",
+        manquants.map(function(i){ return nm(i.fr, i.en, i.st) + " <span class=\"small\">(" + (i.lieu ? esc(i.lieu[0] || i.lieu[1]) : esc(i.zone || "")) + (i.drop ? ", " + nbr(i.drop) + " %" : "") + ")</span>"; }).join("<br>")]);
+    }
+
+    /* 4. Maître voleur : ce qui est disponible et pas encore coché. */
+    var aApprendre = [];
+    for (var n = MIN; n <= lv; n++){
+      (SPELLS[n] || []).forEach(function(a){ if (a[5] === true && !DONE["s:" + n + ":" + a[1]]) aApprendre.push([n, a[0]]); });
+      (POISONS[n] || []).forEach(function(a){ if (!DONE["p:" + n + ":" + a[1]]) aApprendre.push([n, a[0]]); });
+    }
+    if (aApprendre.length){
+      out.push(["", "Chez le maître voleur", aApprendre.length + " ligne" + (aApprendre.length > 1 ? "s" : "") + " que tu n'as pas cochée" + (aApprendre.length > 1 ? "s" : "") + ".",
+        aApprendre.slice(0, 10).map(function(x){ return '<span class="mono">' + x[0] + '</span> ' + esc(x[1]); }).join(" · ")
+        + (aApprendre.length > 10 ? " …" : "") + ' <span class="small">(coche-les dans l\'onglet Niveau)</span>']);
+    }
+
+    /* 5. Métiers. */
+    var mp = (p.metiers || []).filter(function(m){ return m.principal; });
+    if (mp.length){
+      var dort = mp.filter(function(m){ return m.rang < 20; });
+      out.push([dort.length ? "chaud" : "", "Métiers",
+        mp.map(function(m){ return metierNom(m.nom) + ' <span class="mono">' + m.rang + "/" + m.max + "</span>"; }).join(" · "),
+        dort.length ? "Tes métiers principaux dorment. Le travail du cuir fabrique de l'armure en cuir, la seule que tu portes." : ""]);
+    }
+
+    $("conseils").innerHTML = '<ul class="cons">' + out.map(function(c){
+      return '<li class="' + c[0] + '"><span class="ct">' + esc(c[1]) + '</span><p>' + c[2] + '</p>'
+        + (c[3] ? '<div class="d">' + c[3] + '</div>' : '') + '</li>';
+    }).join("") + '</ul>';
+  }
+
+  /* Où je suis : ce que le carnet sait d'une zone. */
+  var zoneTouchee = false;
+  function renderZone(){
+    var sel = $("zoneSel");
+    if (!sel.options.length){
+      sel.innerHTML = ROUTE.map(function(z, i){
+        var d = document.createElement("div"); d.innerHTML = z.zone;
+        return '<option value="' + i + '">' + esc(d.textContent.trim()) + " (" + z.a + "–" + z.b + ")</option>";
+      }).join("");
+    }
+    if (!zoneTouchee){
+      var ref = (persoLu && persoLu.niveau) || L;
+      var dedans = ROUTE.findIndex(function(z){ return ref >= z.a && ref <= z.b; });
+      if (dedans >= 0) sel.value = String(dedans);
+    }
+    var z = ROUTE[Number(sel.value) || 0];
+    if (!z) return;
+    var dj = DJ.filter(function(x){ return !(hideH && x.terr) && x.a <= z.b && x.b >= z.a; });
+    var obj = ITEMS.filter(function(i){ return !(hideH && i.terr) && i.lv >= z.a - 2 && i.lv <= z.b + 2; })
+                   .sort(function(a, b){ return a.lv - b.lv; });
+    $("zoneInfo").innerHTML = '<p class="small" style="margin:0 0 10px">' + z.txt + '</p>'
+      + '<ul class="cons">'
+      + '<li><span class="ct">Donjons dans la tranche</span><p>' + (dj.length ? dj.map(function(x){ return nm(x.fr, x.en, x.st) + ' <span class="mono small">' + x.a + "–" + x.b + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
+      + '<li><span class="ct">Objets du carnet à ce niveau</span><p>' + (obj.length ? obj.map(function(i){ return '<span class="mono small">' + i.lv + "</span> " + nm(i.fr, i.en, i.st) + ' <span class="small">· ' + (i.from === "drop" ? esc((i.mob && (i.mob[0] || i.mob[1])) || "") + (i.drop ? ", " + nbr(i.drop) + " %" : "") : "quête") + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
+      + '</ul>';
   }
 
   /* ---------- État ---------- */
@@ -1352,6 +1498,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       });
       try { localStorage.setItem("voleur-onglet", p); } catch(e){}
       if (p === "perso") chargerPerso();
+      if (p === "conseils"){ if (!persoLu) chargerPerso(); renderConseils(); renderZone(); }
     }
     showTab = show;
     tabs.forEach(function(t){ t.addEventListener("click", function(){ show(t.getAttribute("data-p")); }); });
@@ -1376,6 +1523,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     try { localStorage.setItem("voleur-fait", JSON.stringify(DONE)); } catch(err){}
     renderNow(); renderItems();
   });
+  $("zoneSel").addEventListener("change", function(){ zoneTouchee = true; renderZone(); });
   $("lieux").addEventListener("click", function(e){
     var b = e.target.closest ? e.target.closest("button[data-l]") : null;
     if (!b) return;

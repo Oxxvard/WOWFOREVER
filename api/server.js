@@ -100,8 +100,27 @@ function resume(d){
                  "attack-power","attack-dps","attack-speed","armor","dodge","parry","health","energy"];
   const carac = {};
   garde.forEach(function(k){ if (tout[k] !== undefined) carac[k] = tout[k]; });
+  /* Métiers et points de talent réellement dépensés : de quoi conseiller sans deviner. */
+  const metiers = [];
+  const pr = (c.professions || {});
+  ["primaries", "secondaries"].forEach(function(g){
+    (pr[g] || []).forEach(function(m){
+      const t = (m.tiers || [])[0] || {};
+      metiers.push({ nom: m.name || null, rang: t.skillPoints || 0, max: t.maxSkillPoints || null, principal: g === "primaries" });
+    });
+  });
+  const arbres = (c.specs || []).map(function(sp){
+    return {
+      nom: sp.name || null,
+      points: sp.spentPoints || 0,
+      talents: (sp.talents || []).map(function(t){ return { nom: t.name, rang: t.rank }; })
+    };
+  });
+
   return {
     nom: c.name || null,
+    metiers: metiers,
+    arbres: arbres,
     niveau: c.level || null,
     classe: (c.class || {}).name || null,
     race: (c.race || {}).name || null,

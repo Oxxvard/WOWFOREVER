@@ -81,6 +81,37 @@ async function arme(id){
   } catch(e){ return null; }
 }
 
+/* Les stats de la pièce portée, lues sur son infobulle : sans elles on ne peut pas
+   comparer une proposition à ce que tu as déjà sur le dos. */
+function statsObjet(t){
+  const st = {};
+  const prendre = (re, cle) => { const m = t.match(re); if (m) st[cle] = parseFloat(String(m[1]).replace(",", ".")); };
+  prendre(/\+\s*([0-9]+)\s*Agilité/i, "agilite");
+  prendre(/\+\s*([0-9]+)\s*Force/i, "force");
+  prendre(/\+\s*([0-9]+)\s*Endurance/i, "endurance");
+  prendre(/\+\s*([0-9]+)\s*Esprit/i, "esprit");
+  prendre(/\+\s*([0-9]+)\s*Intelligence/i, "intelligence");
+  prendre(/Armure\s*:?\s*([0-9]+)/i, "armure");
+  prendre(/\+\s*([0-9]+)\s*(?:à la|a la)\s*puissance d[’']attaque/i, "puissanceAttaque");
+  prendre(/chances de coup critique de\s*([0-9.,]+)\s*%/i, "critique");
+  return st;
+}
+
+async function objet(id){
+  if (!id) return null;
+  const dans = armesCache.get("o" + id);
+  if (dans && Date.now() - dans.t < 24 * 3600 * 1000) return dans.v;
+  try {
+    const r = await fetch("https://nether.wowhead.com/forever/tooltip/item/" + id + "?locale=2");
+    if (!r.ok) return null;
+    const j = await r.json();
+    const t = String(j.tooltip || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    const v = { stats: statsObjet(t), niveau: (t.match(/Niveau\s*([0-9]+)\s*requis/i) || [])[1] || null };
+    armesCache.set("o" + id, { t: Date.now(), v: v });
+    return v;
+  } catch(e){ return null; }
+}
+
 function resume(d){
   const c = (d && d.character) || d || {};
   const g = c.gear || {};
@@ -142,6 +173,26 @@ const serveur = http.createServer(async function(req, res){
   if (req.method === "OPTIONS"){ res.writeHead(204); return res.end(); }
 
   if (url.pathname === "/sante") { res.writeHead(200, {"Content-Type":"application/json"}); return res.end('{"ok":true}'); }
+  /* Noms d'icônes pour les objets du fichier de référence : le navigateur
+     n'a pas le droit d'appeler l'API d'infobulles depuis le carnet. */
+  if (url.pathname === "/icones"){
+    const ids = (url.searchParams.get("ids") || "").split(",").map(x => parseInt(x, 10)).filter(x => x > 0).slice(0, 120);
+    const out = {};
+    for (const id of ids){
+      const dans = armesCache.get("i" + id);
+      if (dans && Date.now() - dans.t < 7 * 24 * 3600 * 1000){ out[id] = dans.v; continue; }
+      try {
+        const r = await fetch("https://nether.wowhead.com/forever/tooltip/item/" + id + "?locale=2");
+        const j = r.ok ? await r.json() : {};
+        const ic = j.icon || null;
+        armesCache.set("i" + id, { t: Date.now(), v: ic });
+        out[id] = ic;
+      } catch(e){ out[id] = null; }
+    }
+    res.writeHead(200, {"Content-Type":"application/json; charset=utf-8", "Cache-Control":"public, max-age=86400"});
+    return res.end(JSON.stringify(out));
+  }
+
   if (url.pathname !== "/armurerie"){ res.writeHead(404); return res.end("introuvable"); }
 
   const slug = (url.searchParams.get("perso") || "").toLowerCase();
@@ -170,6 +221,13 @@ const serveur = http.createServer(async function(req, res){
     const v = resume(d);
     for (const sl of ["weapon", "offhand", "ranged"]){
       if (v.stuff[sl] && v.stuff[sl].id) v.stuff[sl].arme = await arme(v.stuff[sl].id);
+    }
+    /* Toutes les pièces portées reçoivent leurs stats, pour pouvoir les comparer. */
+    for (const sl of Object.keys(v.stuff)){
+      if (v.stuff[sl] && v.stuff[sl].id){
+        const o = await objet(v.stuff[sl].id);
+        if (o) v.stuff[sl].stats = o.stats;
+      }
     }
     cache.set(slug, { t: Date.now(), v: v });
     res.writeHead(200, {"Content-Type":"application/json; charset=utf-8", "Cache-Control":"public, max-age=60"});

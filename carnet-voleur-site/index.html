@@ -394,6 +394,18 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
 .elite{color:var(--warn)}
 .neuf{color:var(--ok)}
 
+/* Améliorations : un bloc par emplacement, le porté puis trois cibles. */
+.amel{list-style:none; margin:0; padding:0}
+.amel > li{padding:10px 0; border-bottom:1px solid var(--line)}
+.amel .em{font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.amel .act{font-size:.88rem; color:var(--muted); margin:2px 0 7px}
+.amel .prop{display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:9px; align-items:center; padding:4px 0}
+.amel .prop img{width:28px; height:28px; border-radius:5px; border:1px solid var(--line-strong); display:block}
+.amel .src2{font-size:.8rem; color:var(--muted)}
+.amel .gain{font-family:var(--f-mono); font-size:.9rem; white-space:nowrap; text-align:right}
+.amel .gain.plus{color:var(--ok); font-weight:700}
+.amel .gain.moins{color:var(--dim)}
+
 /* Conseils : une liste de constats, chacun avec son niveau d'urgence. */
 .cons{list-style:none; margin:0; padding:0}
 .cons li{padding:10px 0 10px 13px; border-left:2px solid var(--line-strong); border-bottom:1px solid var(--line)}
@@ -575,6 +587,8 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
           <div><p id="persoMains"></p><ul class="slots" id="persoStuff"></ul></div>
         </div>
         <p class="small" id="persoErr" style="margin-top:10px"></p>
+        <div class="card-head" style="margin-top:24px"><h2>Améliorations par emplacement</h2><span class="note" id="amelioNote"></span></div>
+        <div id="amelio"></div>
       </section>
 
       <section class="card" data-p="conseils">
@@ -1164,6 +1178,11 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
         persoEnCours = false;
         if (d && d.erreur){ $("persoErr").textContent = "L'armurerie n'a rien renvoyé : " + d.erreur; $("persoNote").textContent = "échec"; return; }
         persoLu = d; $("persoErr").textContent = ""; renderPerso(); renderConseils(); renderZone();
+        chargerEquip().then(function(eq){
+          if (!eq){ renderAmelio(); return; }
+          var ids = (eq.items || []).map(function(i){ return i.id; });
+          chargerIcones(ids).then(renderAmelio);
+        });
       })
       .catch(function(){
         persoEnCours = false;
@@ -1352,6 +1371,82 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
       + (QUETES[z.qz] ? blocQuetes(z, ref) : "")
       + '<li><span class="ct">Objets du carnet à ce niveau</span><p>' + (obj.length ? obj.map(function(i){ return '<span class="mono small">' + i.lv + "</span> " + nm(i.fr, i.en, i.st) + ' <span class="small">· ' + (i.from === "drop" ? esc((i.mob && (i.mob[0] || i.mob[1])) || "") + (i.drop ? ", " + nbr(i.drop) + " %" : "") : "quête") + "</span>"; }).join("<br>") : "aucun") + '</p></li>'
       + '</ul>';
+  }
+
+  /* ---------- Améliorations par emplacement ---------- */
+  /* Le fichier de référence porte les objets, leurs stats, leur score et leur source. */
+  var EQUIP = null, EQUIP_IC = {};
+  var SLOT_FICHIER = [
+    ["head","tete","Tête"], ["neck","cou","Cou"], ["shoulder","epaules","Épaules"], ["back","dos","Dos"],
+    ["chest","torse","Torse"], ["wrist","poignets","Poignets"], ["hand","mains","Mains"], ["waist","taille","Taille"],
+    ["leg","jambes","Jambes"], ["foot","pieds","Pieds"], ["leftFinger","doigt","Doigt 1"], ["rightFinger","doigt","Doigt 2"],
+    ["trinket1","bijou","Bijou 1"], ["trinket2","bijou","Bijou 2"], ["ranged","distance","À distance"]
+  ];
+  /* Les clés du relais sont en français, celles du fichier abrégées. */
+  var STAT_CLE = { agilite:"agi", force:"str", endurance:"sta", esprit:"spi", intelligence:"int", armure:"armor", puissanceAttaque:"ap" };
+  function scoreStats(st, w){
+    var t = 0;
+    Object.keys(st || {}).forEach(function(k){
+      var c = STAT_CLE[k] || k;
+      if (w[c]) t += st[k] * w[c];
+    });
+    return Math.round(t * 10) / 10;
+  }
+  function chargerEquip(){
+    if (EQUIP) return Promise.resolve(EQUIP);
+    return fetch("equipement-voleur.json").then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){ EQUIP = d; return d; }).catch(function(){ return null; });
+  }
+  function chargerIcones(ids){
+    var manque = ids.filter(function(i){ return EQUIP_IC[i] === undefined; });
+    if (!manque.length) return Promise.resolve();
+    return fetch(API + "/icones?ids=" + manque.join(","))
+      .then(function(r){ return r.ok ? r.json() : {}; })
+      .then(function(d){ Object.keys(d).forEach(function(k){ EQUIP_IC[k] = d[k]; }); })
+      .catch(function(){ manque.forEach(function(i){ EQUIP_IC[i] = null; }); });
+  }
+  function renderAmelio(){
+    var p = persoLu;
+    if (!p) return;
+    if (!EQUIP){
+      $("amelio").innerHTML = '<p class="small">Fichier de référence absent : <span class="mono">equipement-voleur.json</span> doit être dans le dossier publié.</p>';
+      return;
+    }
+    var w = EQUIP.weights || {}, lv = p.niveau || L, stuff = p.stuff || {};
+    /* Puissance totale : tout ce qui est porté, plus deux par niveau. */
+    var total = 2 * lv;
+    Object.keys(stuff).forEach(function(k){ if (stuff[k] && stuff[k].stats) total += scoreStats(stuff[k].stats, w); });
+    if (total <= 0) total = 1;
+    $("amelioNote").textContent = "puissance totale " + nbr(total) + " · gain rapporté à ce total";
+
+    var lignes = SLOT_FICHIER.map(function(sl){
+      var porte = stuff[sl[0]];
+      var scorePorte = porte && porte.stats ? scoreStats(porte.stats, w) : 0;
+      var cands = (EQUIP.items || []).filter(function(it){
+        if (it.slot !== sl[1]) return false;
+        if (it.reqLevel != null && it.reqLevel > lv) return false;
+        if (hideH && it.horde) return false;
+        return true;
+      }).sort(function(a, b){ return (b.score || 0) - (a.score || 0); }).slice(0, 3);
+      if (!cands.length && !porte) return "";
+      var act = porte
+        ? 'Porté : <b>' + esc(porte.nom || ("objet " + porte.id)) + '</b> <span class="mono">' + nbr(scorePorte) + '</span>'
+        : '<span class="vide">rien d\'équipé</span>';
+      var props = cands.map(function(it){
+        var gain = ((it.score || 0) - scorePorte) / total * 100;
+        var ic = EQUIP_IC[it.id];
+        return '<div class="prop">'
+          + (ic ? '<img src="https://wow.zamimg.com/images/wow/icons/medium/' + esc(ic) + '.jpg" alt="" loading="lazy">' : '<span></span>')
+          + '<div><a href="https://www.wowhead.com/forever/fr/item=' + it.id + '" target="_blank" rel="noopener">' + nm(it.fr, it.en, 1) + "</a>"
+          + '<div class="src2">' + esc(it.source || "") + (it.reqLevel != null ? ' · niv. ' + it.reqLevel : "") + (it.horde ? ' · <span class="elite">territoire Horde</span>' : "") + "</div></div>"
+          + '<span class="gain ' + (gain > 0 ? "plus" : "moins") + '">' + (gain > 0 ? "+" : "") + nbr(gain) + " %</span></div>";
+      }).join("");
+      return '<li><span class="em">' + esc(sl[2]) + '</span><p class="act">' + act + "</p>"
+        + (props || '<p class="small">Rien de mieux dans le fichier à ton niveau.</p>') + "</li>";
+    }).join("");
+
+    $("amelio").innerHTML = '<ul class="amel">' + lignes + "</ul>"
+      + '<p class="small" style="margin-top:10px">Les armes ne sont pas ici : elles vivent dans l\'onglet Armes, avec la règle des deux mains plus haut.</p>';
   }
 
   /* ---------- État ---------- */
@@ -1636,6 +1731,7 @@ section.card{background:none; border:0; border-radius:0; padding:0; margin-botto
     hideH = !hideH;
     try { localStorage.setItem("voleur-horde", hideH ? "1" : "0"); } catch(e){}
     render();
+      if (persoLu && EQUIP) renderAmelio();
   });
   var showTab = null;
   (function(){
